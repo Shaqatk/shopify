@@ -45,14 +45,20 @@
 >
   <div class="product-information-a24__container">
     
-    {%- comment -%} LEFT COLUMN: Product Details (sticky) {%- endcomment -%}
+    {%- comment -%} LEFT COLUMN: Product Details (sticky at bottom) {%- endcomment -%}
     <div class="product-information-a24__left">
-      {%- comment -%} A24 Pricing Display (before product details) {%- endcomment -%}
-      <div class="product-information-a24__pricing">
-        {% render 'a24-pricing-display' %}
-      </div>
+      {%- comment -%} Spacer to push content down (A24 style) {%- endcomment -%}
+      <div class="product-information-a24__spacer"></div>
       
-      {{ product_details }}
+      {%- comment -%} Content wrapper {%- endcomment -%}
+      <div class="product-information-a24__left-content">
+        {%- comment -%} A24 Pricing Display (injected after title via CSS order) {%- endcomment -%}
+        <div class="product-information-a24__pricing">
+          {% render 'a24-pricing-display' %}
+        </div>
+        
+        {{ product_details }}
+      </div>
     </div>
 
     {%- comment -%} RIGHT COLUMN: Media Stack (top) + Purchase Bar (bottom) {%- endcomment -%}
@@ -102,48 +108,78 @@
     max-width: 100%;
     margin: 0 auto;
     padding: 48px 40px;
-    align-items: flex-start;
+    align-items: stretch;
+    min-height: calc(100vh - 100px);
   }
 
-  /* LEFT COLUMN: Sticky Details */
+  /* LEFT COLUMN: Flex container to push content down */
   .product-information-a24__left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Push content to bottom */
+    align-items: flex-start;
+    position: relative;
+  }
+
+  /* Spacer pushes content down */
+  .product-information-a24__spacer {
+    flex: 1 1 auto; /* Takes up available space */
+    min-height: 100px; /* Minimum space above content */
+  }
+
+  /* Content wrapper at bottom */
+  .product-information-a24__left-content {
+    flex: 0 0 auto;
+    width: 100%;
     position: sticky;
-    top: calc(var(--a24-header-offset) + var(--a24-sticky-top));
-    align-self: flex-start;
-    max-height: calc(100vh - var(--a24-header-offset) - (var(--a24-sticky-top) * 2));
-    overflow-y: auto;
-    overflow-x: hidden;
-    /* Minimal scrollbar styling */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    bottom: 48px;
   }
 
-  .product-information-a24__left::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .product-information-a24__left::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .product-information-a24__left::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
+  /* Left content wrapper - flex for ordering */
+  .product-information-a24__left-content {
+    display: flex;
+    flex-direction: column;
   }
 
   /* Hide buy-buttons from left column (they go in purchase bar) */
   .product-information-a24__left .buy-buttons {
-    display: none;
+    display: none !important;
   }
 
-  /* Hide price block from left column (we use custom A24 pricing) */
+  /* Hide default price block (we use custom A24 pricing) */
   .product-information-a24__left .price {
-    display: none;
+    display: none !important;
   }
 
-  /* A24 Pricing Display */
+  /* Hide accelerated checkout in left column */
+  .product-information-a24__left .accelerated-checkout,
+  .product-information-a24__left .shopify-payment-button {
+    display: none !important;
+  }
+
+  /* A24 Pricing Display - positioned after title */
   .product-information-a24__pricing {
+    order: 2;
+    margin-top: 8px;
     margin-bottom: 32px;
+  }
+
+  /* Product details block */
+  .product-information-a24__left .product-details {
+    order: 3;
+  }
+
+  /* Product details group wrapper */
+  .product-information-a24__left .product-details .group-block {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Force specific elements to reorder within product details */
+  .product-information-a24__left .product-details h1,
+  .product-information-a24__left .product-details [class*="product-title"],
+  .product-information-a24__left .product-details [class*="heading"] {
+    order: 1;
   }
 
   /* RIGHT COLUMN: Media + Purchase Bar */
@@ -232,18 +268,27 @@
     .product-information-a24__container {
       grid-template-columns: 1fr;
       gap: 24px;
-      padding: 24px var(--padding-md, 16px) 120px; /* Extra bottom padding for fixed purchase bar */
+      padding: 24px var(--padding-md, 16px) 140px;
+      min-height: auto;
+      align-items: flex-start;
     }
 
     .product-information-a24__left {
       position: static;
-      max-height: none;
       order: 1;
-      overflow-y: visible;
+      justify-content: flex-start;
+    }
+
+    .product-information-a24__spacer {
+      display: none; /* No spacer on mobile */
+    }
+
+    .product-information-a24__left-content {
+      position: static;
     }
 
     .product-information-a24__left .buy-buttons {
-      display: none; /* Still hidden on mobile */
+      display: none !important;
     }
 
     .product-information-a24__right {
@@ -258,13 +303,11 @@
       right: 0;
       top: auto;
       z-index: 100;
-      border-radius: 0;
-      border-left: none;
-      border-right: none;
-      border-bottom: none;
+      background: #f1f1f1;
+      border-top: 1px solid #a8a8a8;
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
       padding: 16px;
-      order: 2;
+      max-width: none;
     }
 
     .product-information-a24__media {

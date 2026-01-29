@@ -35,81 +35,75 @@
 %}
 
 <div class="a24-pricing-display" data-a24-pricing>
-  {%- comment -%} Regular Price {%- endcomment -%}
-  <div class="a24-pricing-display__regular">
-    {{ variant.price | money }}
-  </div>
-  
-  {%- comment -%} Member Price (if subscription available) {%- endcomment -%}
-  {% if has_selling_plans and monthly_plan %}
-    <div class="a24-pricing-display__member">
+  {%- comment -%} Price Row - All prices on same line like A24 {%- endcomment -%}
+  <div class="a24-pricing-display__row">
+    <span class="a24-pricing-display__regular">{{ variant.price | money }}</span>
+    {% if has_selling_plans and monthly_plan %}
       <span class="a24-pricing-display__member-price">{{ subscription_price | money }}</span>
-    </div>
-    
-    <div class="a24-pricing-display__savings">
-      Members save {{ savings_percent }}% 
-      <a href="/pages/aaa24" class="a24-pricing-display__join-link">Join us →</a>
-    </div>
-  {% endif %}
+      <span class="a24-pricing-display__savings">
+        Members save {{ savings_percent }}% 
+        <a href="/pages/aaa24" class="a24-pricing-display__join-link">Join us →</a>
+      </span>
+    {% endif %}
+  </div>
 </div>
 
 {% stylesheet %}
   /* ============================================
      A24 Pricing Display (Left Column)
+     Matches A24: $22  $19.80  Members save 10% Join us →
      ============================================ */
   
   .a24-pricing-display {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
     margin-bottom: 32px;
   }
 
-  /* Regular Price */
+  /* Price Row - horizontal layout */
+  .a24-pricing-display__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  /* Regular Price - largest */
   .a24-pricing-display__regular {
-    font-size: 2.625rem; /* 42px */
-    font-weight: 700;
-    letter-spacing: -0.0375em;
+    font-size: 1.75rem; /* 28px - matches A24 */
+    font-weight: 400;
+    letter-spacing: -0.02em;
     line-height: 1;
     color: #000000;
   }
 
-  /* Member/Subscription Price */
-  .a24-pricing-display__member {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
+  /* Member/Subscription Price - grey */
   .a24-pricing-display__member-price {
-    font-size: 1.6875rem; /* 27px */
+    font-size: 1.25rem; /* 20px */
     font-weight: 400;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
     line-height: 1;
-    color: #787878; /* Grey */
+    color: #787878;
   }
 
-  /* Savings Text */
+  /* Savings Text - small uppercase */
   .a24-pricing-display__savings {
-    font-size: 0.6875rem; /* 11px */
-    font-weight: 600;
+    font-size: 0.625rem; /* 10px */
+    font-weight: 500;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     line-height: 1;
-    color: #000000;
-    margin-top: 4px;
+    color: #787878;
   }
 
   .a24-pricing-display__join-link {
-    color: #000000;
+    color: #787878;
     text-decoration: none;
-    border-bottom: 1px solid #000000;
+    border-bottom: 1px solid #787878;
     transition: color 0.2s ease, border-color 0.2s ease;
   }
 
   .a24-pricing-display__join-link:hover {
-    color: #787878;
-    border-color: #787878;
+    color: #000000;
+    border-color: #000000;
   }
 
   /* Mobile Adjustments */
@@ -118,12 +112,16 @@
       margin-bottom: 24px;
     }
 
+    .a24-pricing-display__row {
+      gap: 8px;
+    }
+
     .a24-pricing-display__regular {
-      font-size: 2rem; /* 32px */
+      font-size: 1.5rem; /* 24px */
     }
 
     .a24-pricing-display__member-price {
-      font-size: 1.25rem; /* 20px */
+      font-size: 1rem; /* 16px */
     }
   }
 {% endstylesheet %}

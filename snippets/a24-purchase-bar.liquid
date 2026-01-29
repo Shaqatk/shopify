@@ -147,112 +147,135 @@
   }
 
   .a24-purchase-bar__content {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    align-items: end;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 32px !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
   }
 
   /* ============================================
-     Quantity Selector (A24 Style - Plain Numbers)
+     Quantity Selector (A24 Style - PLAIN TEXT Numbers)
      ============================================ */
   
   .a24-quantity-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
   }
 
   .a24-quantity__header {
-    border-bottom: 1px solid #000000;
-    padding-bottom: 8px;
+    border-top: 1px solid #000000 !important;
+    border-bottom: none !important;
+    padding-top: 12px !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 12px !important;
   }
 
   .a24-quantity__label {
-    font-size: 0.6875rem; /* 11px */
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: #000000;
-    line-height: 1;
+    font-size: 0.6875rem !important; /* 11px */
+    font-weight: 500 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #000000 !important;
+    line-height: 1 !important;
   }
 
   .a24-quantity__numbers {
-    display: flex;
-    gap: 16px;
-    align-items: baseline;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: baseline !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid #000000 !important; /* Line below numbers like A24 */
   }
 
+  /* PLAIN TEXT - NO BOXES, NO BACKGROUNDS */
   .a24-quantity__number {
-    position: relative;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    font-family: inherit;
-    font-size: 1.125rem; /* 18px - smaller than before */
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    color: #a8a8a8; /* Grey by default */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1.4;
+    position: relative !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    font-family: inherit !important;
+    font-size: 1.5rem !important; /* 24px - larger like A24 */
+    font-weight: 400 !important;
+    letter-spacing: -0.02em !important;
+    color: #a8a8a8 !important; /* Grey by default */
+    cursor: pointer !important;
+    transition: color 0.15s ease !important;
+    line-height: 1 !important;
+    min-width: auto !important;
+    min-height: auto !important;
+    width: auto !important;
+    height: auto !important;
+    aspect-ratio: unset !important;
   }
 
   .a24-quantity__number:hover {
-    color: #000000;
+    color: #000000 !important;
+    background: none !important;
+    background-color: transparent !important;
   }
 
+  /* Active = bold black text, NO box, NO background */
   .a24-quantity__number.active {
-    color: #000000;
-    border-bottom-color: #000000;
-    font-weight: 600;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    background: none !important;
+    background-color: transparent !important;
+    border: none !important;
   }
 
   .a24-quantity__number:focus {
-    outline: none;
+    outline: none !important;
+    background: none !important;
   }
 
   .a24-quantity__number:focus-visible {
-    outline: 2px solid #000000;
-    outline-offset: 4px;
+    outline: 2px solid #000000 !important;
+    outline-offset: 4px !important;
+    background: none !important;
   }
 
   /* ============================================
-     Add to Cart Button (A24 Style - Outlined)
+     Add to Cart Button (A24 Style - LARGE Outlined)
      ============================================ */
   
   .a24-add-to-cart {
-    padding: 20px 48px;
-    font-family: inherit;
-    font-size: 0.875rem; /* 14px */
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: #000000;
-    background-color: transparent;
-    border: 1px solid #000000;
-    border-radius: 0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
+    padding: 24px 56px !important; /* Larger padding */
+    font-family: inherit !important;
+    font-size: 0.8125rem !important; /* 13px */
+    font-weight: 400 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: #000000 !important;
+    background-color: transparent !important;
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    white-space: nowrap !important;
+    min-width: 180px !important;
   }
 
   .a24-add-to-cart:hover:not(:disabled) {
-    background-color: #000000;
-    color: #f1f1f1;
+    background-color: #000000 !important;
+    color: #f1f1f1 !important;
   }
 
   .a24-add-to-cart:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    border-color: #a8a8a8;
-    color: #a8a8a8;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    border-color: #a8a8a8 !important;
+    color: #a8a8a8 !important;
   }
 
   .a24-add-to-cart:focus-visible {
-    outline: 2px solid #000000;
-    outline-offset: 4px;
+    outline: 2px solid #000000 !important;
+    outline-offset: 4px !important;
   }
 
   /* ============================================
@@ -261,22 +284,23 @@
   
   @media screen and (max-width: 749px) {
     .a24-purchase-bar__content {
-      grid-template-columns: 1fr;
-      gap: 20px;
+      flex-direction: column !important;
+      gap: 20px !important;
+      align-items: stretch !important;
     }
 
     .a24-quantity__numbers {
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px !important;
+      flex-wrap: wrap !important;
     }
 
     .a24-quantity__number {
-      font-size: 1rem;
+      font-size: 1.25rem !important; /* 20px on mobile */
     }
 
     .a24-add-to-cart {
-      width: 100%;
-      padding: 16px 24px;
+      width: 100% !important;
+      padding: 20px 24px !important;
     }
   }
 
