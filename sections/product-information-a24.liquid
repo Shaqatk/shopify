@@ -80,51 +80,79 @@
 
 {% stylesheet %}
   /* ============================================
-     A24 PDP Layout Styles
+     A24 PDP Layout Styles - Phase 2 Refined
      ============================================ */
   
   .product-information-a24 {
     --a24-gap: var(--gap, 48px);
-    --a24-left-width: 400px;
+    --a24-left-width: 420px;
+    --a24-right-max-width: 720px;
     --a24-purchase-bar-height: auto;
     --a24-header-offset: var(--header-height, 0px);
+    --a24-sticky-top: 24px;
   }
 
   .product-information-a24__container {
     display: grid;
     grid-template-columns: var(--a24-left-width) 1fr;
     gap: var(--a24-gap);
-    max-width: 1440px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 var(--padding-lg, 24px);
+    padding: 48px var(--padding-lg, 24px);
+    align-items: flex-start;
   }
 
   /* LEFT COLUMN: Sticky Details */
   .product-information-a24__left {
     position: sticky;
-    top: calc(var(--a24-header-offset) + 24px);
+    top: calc(var(--a24-header-offset) + var(--a24-sticky-top));
     align-self: flex-start;
-    max-height: calc(100vh - var(--a24-header-offset) - 48px);
+    max-height: calc(100vh - var(--a24-header-offset) - (var(--a24-sticky-top) * 2));
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Minimal scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .product-information-a24__left::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .product-information-a24__left::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .product-information-a24__left::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  /* Hide buy-buttons from left column (they go in purchase bar) */
+  .product-information-a24__left .buy-buttons {
+    display: none;
   }
 
   /* RIGHT COLUMN: Purchase Bar + Media */
   .product-information-a24__right {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    min-height: 100vh; /* Ensure scrolling */
+    gap: 16px;
+    max-width: var(--a24-right-max-width);
+    width: 100%;
   }
 
   /* Purchase Bar (sticky within right column) */
   .product-information-a24__purchase-bar {
     position: sticky;
-    top: calc(var(--a24-header-offset) + 24px);
+    top: calc(var(--a24-header-offset) + var(--a24-sticky-top));
     z-index: 10;
     background: var(--color-background);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    padding: 20px;
+    /* Subtle shadow for depth */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .a24-purchase-bar__content {
@@ -135,37 +163,60 @@
   .product-information-a24__media {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   /* Override Ritual's media gallery to stack vertically */
   .product-information-a24__media .media-gallery {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
 
   .product-information-a24__media .media-gallery__item {
     width: 100%;
+    aspect-ratio: auto;
+  }
+
+  /* Remove grid layouts from media gallery */
+  .product-information-a24__media .media-gallery--grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ensure images fill width */
+  .product-information-a24__media img,
+  .product-information-a24__media video {
+    width: 100%;
+    height: auto;
+    display: block;
   }
 
   /* MOBILE: Single column, purchase bar at bottom */
   @media screen and (max-width: 749px) {
+    .product-information-a24 {
+      --a24-sticky-top: 16px;
+    }
+
     .product-information-a24__container {
       grid-template-columns: 1fr;
       gap: 24px;
-      padding: 0 var(--padding-md, 16px);
+      padding: 24px var(--padding-md, 16px) 120px; /* Extra bottom padding for fixed purchase bar */
     }
 
     .product-information-a24__left {
       position: static;
       max-height: none;
       order: 1;
+      overflow-y: visible;
+    }
+
+    .product-information-a24__left .buy-buttons {
+      display: none; /* Still hidden on mobile */
     }
 
     .product-information-a24__right {
       order: 0;
-      min-height: auto;
+      max-width: 100%;
     }
 
     .product-information-a24__purchase-bar {
@@ -179,25 +230,55 @@
       border-left: none;
       border-right: none;
       border-bottom: none;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+      padding: 16px;
       order: 2;
     }
 
     .product-information-a24__media {
       order: 1;
+      gap: 12px;
     }
   }
 
   /* TABLET: Adjust left column width */
   @media screen and (min-width: 750px) and (max-width: 1023px) {
     .product-information-a24 {
-      --a24-left-width: 320px;
+      --a24-left-width: 340px;
+      --a24-right-max-width: 600px;
+    }
+
+    .product-information-a24__container {
+      padding: 32px var(--padding-md, 20px);
+    }
+  }
+
+  /* LARGE DESKTOP: Wider layout */
+  @media screen and (min-width: 1400px) {
+    .product-information-a24 {
+      --a24-left-width: 480px;
+      --a24-right-max-width: 800px;
     }
   }
 
   /* If header is sticky, adjust offset */
   body:has(#header-group #header-component[data-sticky-state='active']) .product-information-a24 {
     --a24-header-offset: var(--header-height);
+  }
+
+  /* Minimal typography overrides for A24 aesthetic */
+  .product-information-a24__left h1 {
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+
+  .product-information-a24__left .price {
+    font-weight: 500;
+  }
+
+  /* Smooth scroll behavior */
+  .product-information-a24__left {
+    scroll-behavior: smooth;
   }
 
 {% endstylesheet %}
