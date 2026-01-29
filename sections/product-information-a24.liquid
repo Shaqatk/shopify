@@ -53,16 +53,9 @@
     {%- comment -%} RIGHT COLUMN: Purchase Bar (sticky) + Media Stack (scrolls) {%- endcomment -%}
     <div class="product-information-a24__right">
       
-      {%- comment -%} Purchase Bar - will be implemented in Phase 3 {%- endcomment -%}
-      <div class="product-information-a24__purchase-bar" data-a24-purchase-bar>
-        <div class="a24-purchase-bar__content">
-          {%- comment -%} Placeholder for Phase 3: subscription selector, quantity, ATC {%- endcomment -%}
-          <div class="a24-purchase-bar__placeholder">
-            <p style="font-size: 0.875rem; color: #999; text-align: center; padding: 1rem;">
-              Purchase bar (Phase 3)
-            </p>
-          </div>
-        </div>
+      {%- comment -%} Purchase Bar (Phase 3 Complete) {%- endcomment -%}
+      <div class="product-information-a24__purchase-bar">
+        {% render 'a24-purchase-bar' %}
       </div>
 
       {%- comment -%} Media Stack {%- endcomment -%}
