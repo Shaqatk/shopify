@@ -84,21 +84,21 @@
      ============================================ */
   
   .product-information-a24 {
-    --a24-gap: var(--gap, 48px);
-    --a24-left-width: 420px;
-    --a24-right-max-width: 720px;
+    --a24-gap: 64px;
+    --a24-left-width: 380px;
+    --a24-right-max-width: 100%;
     --a24-purchase-bar-height: auto;
     --a24-header-offset: var(--header-height, 0px);
-    --a24-sticky-top: 24px;
+    --a24-sticky-top: 32px;
   }
 
   .product-information-a24__container {
     display: grid;
     grid-template-columns: var(--a24-left-width) 1fr;
     gap: var(--a24-gap);
-    max-width: 1600px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 48px var(--padding-lg, 24px);
+    padding: 48px 40px;
     align-items: flex-start;
   }
 
@@ -137,7 +137,7 @@
   .product-information-a24__right {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     max-width: var(--a24-right-max-width);
     width: 100%;
   }
@@ -149,46 +149,67 @@
     z-index: 10;
     background: var(--color-background);
     border: 1px solid rgba(0, 0, 0, 0.12);
-    border-radius: 4px;
-    padding: 20px;
+    border-radius: 0;
+    padding: 20px 24px;
     /* Subtle shadow for depth */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    margin-bottom: 4px;
   }
 
   .a24-purchase-bar__content {
     /* Will be styled in Phase 3 */
   }
 
-  /* Media Stack (scrolls) */
+  /* Media Stack (scrolls) - NO CAROUSEL */
   .product-information-a24__media {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
   }
 
-  /* Override Ritual's media gallery to stack vertically */
-  .product-information-a24__media .media-gallery {
+  /* Force vertical stacking - override ALL Ritual carousel/grid styles */
+  .product-information-a24__media .media-gallery,
+  .product-information-a24__media .media-gallery--stacked,
+  .product-information-a24__media .media-gallery--grid,
+  .product-information-a24__media .media-gallery--slideshow {
     display: flex !important;
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: column !important;
+    gap: 12px !important;
+    grid-template-columns: none !important;
   }
 
-  .product-information-a24__media .media-gallery__item {
-    width: 100%;
-    aspect-ratio: auto;
+  /* Remove ALL carousel controls */
+  .product-information-a24__media .media-gallery__controls,
+  .product-information-a24__media .slideshow-controls,
+  .product-information-a24__media .slideshow-arrows,
+  .product-information-a24__media .media-gallery__thumbnails {
+    display: none !important;
   }
 
-  /* Remove grid layouts from media gallery */
-  .product-information-a24__media .media-gallery--grid {
-    grid-template-columns: 1fr !important;
+  /* Each media item stacks vertically */
+  .product-information-a24__media .media-gallery__item,
+  .product-information-a24__media .slideshow-slide {
+    width: 100% !important;
+    aspect-ratio: auto !important;
+    position: static !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
-  /* Ensure images fill width */
+  /* Ensure images fill width and maintain aspect ratio */
   .product-information-a24__media img,
   .product-information-a24__media video {
     width: 100%;
     height: auto;
     display: block;
+    object-fit: contain;
+  }
+
+  /* Remove any slideshow/carousel JavaScript behavior */
+  .product-information-a24__media .media-gallery__item[hidden],
+  .product-information-a24__media .slideshow-slide[hidden] {
+    display: block !important;
   }
 
   /* MOBILE: Single column, purchase bar at bottom */
@@ -244,20 +265,24 @@
   /* TABLET: Adjust left column width */
   @media screen and (min-width: 750px) and (max-width: 1023px) {
     .product-information-a24 {
-      --a24-left-width: 340px;
-      --a24-right-max-width: 600px;
+      --a24-left-width: 320px;
+      --a24-gap: 48px;
     }
 
     .product-information-a24__container {
-      padding: 32px var(--padding-md, 20px);
+      padding: 32px 24px;
     }
   }
 
-  /* LARGE DESKTOP: Wider layout */
+  /* LARGE DESKTOP: Maintain full-width feel */
   @media screen and (min-width: 1400px) {
     .product-information-a24 {
-      --a24-left-width: 480px;
-      --a24-right-max-width: 800px;
+      --a24-left-width: 420px;
+      --a24-gap: 80px;
+    }
+
+    .product-information-a24__container {
+      padding: 64px 60px;
     }
   }
 
