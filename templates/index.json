@@ -15,7 +15,7 @@
           "type": "text",
           "name": "t:names.text",
           "settings": {
-            "text": "<p>Fashion for the wild at heart. Build your capsule collection and adorn it with iconic pieces to create a style that’s uniquely yours. </p>",
+            "text": "<p>This is a test</p>",
             "width": "fit-content",
             "max_width": "narrow",
             "alignment": "left",
