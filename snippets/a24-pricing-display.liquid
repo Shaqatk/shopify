@@ -1,0 +1,129 @@
+{% comment %}
+  A24 Pricing Display
+  
+  Shows pricing in the left column:
+  - Regular price (large, bold)
+  - Member/subscription price (grey)
+  - Savings text with "Join us" link
+{% endcomment %}
+
+{% liquid
+  assign product = closest.product
+  assign variant = product.selected_or_first_available_variant
+  
+  # Check if product has selling plans (subscriptions)
+  assign has_selling_plans = false
+  assign monthly_plan = null
+  if product.selling_plan_groups.size > 0
+    assign has_selling_plans = true
+    # Find monthly selling plan
+    for selling_plan_group in product.selling_plan_groups
+      for selling_plan in selling_plan_group.selling_plans
+        if selling_plan.name contains 'month' or selling_plan.name contains 'Month'
+          assign monthly_plan = selling_plan
+          break
+        endif
+      endfor
+    endfor
+  endif
+  
+  # Calculate subscription price
+  if monthly_plan
+    assign subscription_price = variant.price | times: monthly_plan.price_adjustments.first.value | divided_by: 100.0
+    assign savings_percent = monthly_plan.price_adjustments.first.value | abs
+  endif
+%}
+
+<div class="a24-pricing-display" data-a24-pricing>
+  {%- comment -%} Regular Price {%- endcomment -%}
+  <div class="a24-pricing-display__regular">
+    {{ variant.price | money }}
+  </div>
+  
+  {%- comment -%} Member Price (if subscription available) {%- endcomment -%}
+  {% if has_selling_plans and monthly_plan %}
+    <div class="a24-pricing-display__member">
+      <span class="a24-pricing-display__member-price">{{ subscription_price | money }}</span>
+    </div>
+    
+    <div class="a24-pricing-display__savings">
+      Members save {{ savings_percent }}% 
+      <a href="/pages/aaa24" class="a24-pricing-display__join-link">Join us →</a>
+    </div>
+  {% endif %}
+</div>
+
+{% stylesheet %}
+  /* ============================================
+     A24 Pricing Display (Left Column)
+     ============================================ */
+  
+  .a24-pricing-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  /* Regular Price */
+  .a24-pricing-display__regular {
+    font-size: 2.625rem; /* 42px */
+    font-weight: 700;
+    letter-spacing: -0.0375em;
+    line-height: 1;
+    color: #000000;
+  }
+
+  /* Member/Subscription Price */
+  .a24-pricing-display__member {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .a24-pricing-display__member-price {
+    font-size: 1.6875rem; /* 27px */
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #787878; /* Grey */
+  }
+
+  /* Savings Text */
+  .a24-pricing-display__savings {
+    font-size: 0.6875rem; /* 11px */
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #000000;
+    margin-top: 4px;
+  }
+
+  .a24-pricing-display__join-link {
+    color: #000000;
+    text-decoration: none;
+    border-bottom: 1px solid #000000;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .a24-pricing-display__join-link:hover {
+    color: #787878;
+    border-color: #787878;
+  }
+
+  /* Mobile Adjustments */
+  @media screen and (max-width: 749px) {
+    .a24-pricing-display {
+      margin-bottom: 24px;
+    }
+
+    .a24-pricing-display__regular {
+      font-size: 2rem; /* 32px */
+    }
+
+    .a24-pricing-display__member-price {
+      font-size: 1.25rem; /* 20px */
+    }
+  }
+{% endstylesheet %}

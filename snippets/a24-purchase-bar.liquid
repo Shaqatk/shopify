@@ -70,40 +70,25 @@
       
       <div class="a24-purchase-bar__content">
         
-        {%- comment -%} PRICING DISPLAY (A24 Style) {%- endcomment -%}
-        <div class="a24-pricing">
-          {%- comment -%} Regular Price {%- endcomment -%}
-          <div class="a24-pricing__regular">
-            {{ variant.price | money }}
-          </div>
-          
-          {%- comment -%} Member Price (if subscription available) {%- endcomment -%}
-          {% if has_selling_plans and monthly_plan %}
-            <div class="a24-pricing__member">
-              <span class="a24-pricing__member-price">{{ subscription_price | money }}</span>
-              <span class="a24-pricing__member-text">
-                Members save {{ savings_percent }}% 
-                <a href="/pages/aaa24" class="a24-pricing__join-link">Join us →</a>
-              </span>
-            </div>
-            
-            {%- comment -%} Hidden input for selling plan {%- endcomment -%}
-            <input
-              type="hidden"
-              name="selling_plan"
-              value="{{ monthly_plan.id }}"
-              data-selling-plan-input
-            >
-          {% endif %}
-        </div>
+        {%- comment -%} Hidden selling plan input (if available) {%- endcomment -%}
+        {% if has_selling_plans and monthly_plan %}
+          <input
+            type="hidden"
+            name="selling_plan"
+            value="{{ monthly_plan.id }}"
+            data-selling-plan-input
+          >
+        {% endif %}
         
-        {%- comment -%} QUANTITY SELECTOR (1-9 buttons, A24 style) {%- endcomment -%}
+        {%- comment -%} QUANTITY SELECTOR (A24 style - plain numbers with underlines) {%- endcomment -%}
         <div class="a24-quantity-selector" data-a24-quantity>
-          <span class="a24-quantity__label" id="a24-quantity-label-{{ section.id }}">
-            Quantity
-          </span>
+          <div class="a24-quantity__header">
+            <span class="a24-quantity__label" id="a24-quantity-label-{{ section.id }}">
+              QUANTITY
+            </span>
+          </div>
           <div 
-            class="a24-quantity__buttons" 
+            class="a24-quantity__numbers" 
             role="radiogroup" 
             aria-labelledby="a24-quantity-label-{{ section.id }}"
             data-quantity-buttons
@@ -112,7 +97,7 @@
               <button
                 type="button"
                 role="radio"
-                class="a24-quantity__button{% if i == initial_quantity %} active{% endif %}"
+                class="a24-quantity__number{% if i == initial_quantity %} active{% endif %}"
                 data-quantity="{{ i }}"
                 data-quantity-button
                 aria-checked="{% if i == initial_quantity %}true{% else %}false{% endif %}"
@@ -162,174 +147,107 @@
   }
 
   .a24-purchase-bar__content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--a24-space-3, 30px);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: end;
   }
 
   /* ============================================
-     Pricing Display (A24 Style)
-     ============================================ */
-  
-  .a24-pricing {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* Regular Price */
-  .a24-pricing__regular {
-    font-size: 2.625rem; /* 42px - H2 size */
-    font-weight: 700;
-    letter-spacing: -0.0375em;
-    line-height: 1;
-    color: #000000;
-  }
-
-  /* Member/Subscription Price */
-  .a24-pricing__member {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .a24-pricing__member-price {
-    font-size: 1.6875rem; /* 27px - slightly smaller than regular */
-    font-weight: 400;
-    letter-spacing: -0.025em;
-    line-height: 1;
-    color: #787878; /* Grey color like in image */
-  }
-
-  .a24-pricing__member-text {
-    font-size: 0.6875rem; /* 11px - tiny size */
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    line-height: 1;
-    color: #000000;
-  }
-
-  .a24-pricing__join-link {
-    color: #000000;
-    text-decoration: none;
-    border-bottom: 1px solid #000000;
-    transition: color 0.2s ease, border-color 0.2s ease;
-  }
-
-  .a24-pricing__join-link:hover {
-    color: #787878;
-    border-color: #787878;
-  }
-
-  /* ============================================
-     Quantity Selector (1-9 Buttons)
+     Quantity Selector (A24 Style - Plain Numbers)
      ============================================ */
   
   .a24-quantity-selector {
     display: flex;
     flex-direction: column;
-    gap: var(--a24-space, 10px);
+    gap: 16px;
+  }
+
+  .a24-quantity__header {
+    border-bottom: 1px solid #000000;
+    padding-bottom: 8px;
   }
 
   .a24-quantity__label {
-    font-size: var(--a24-tiny-size, 0.6875rem);
+    font-size: 0.6875rem; /* 11px */
     font-weight: 600;
-    letter-spacing: var(--a24-ls-wider, 0.04em);
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #000000;
+    line-height: 1;
   }
 
-  .a24-quantity__buttons {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 8px;
+  .a24-quantity__numbers {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
   }
 
-  .a24-quantity__button {
-    position: relative; /* For focus ring pseudo-element */
-    aspect-ratio: 1;
-    min-width: 0;
+  .a24-quantity__number {
+    position: relative;
     padding: 0;
-    font-family: var(--a24-font-family);
-    font-size: var(--a24-small-size, 0.875rem);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    font-size: 1.125rem; /* 18px - smaller than before */
     font-weight: 400;
-    letter-spacing: var(--a24-ls-normal, -0.01em);
-    color: #000000;
-    background-color: transparent;
-    border: 1px solid #a8a8a8;
-    border-radius: 0;
+    letter-spacing: -0.01em;
+    color: #a8a8a8; /* Grey by default */
     cursor: pointer;
     transition: all 0.2s ease;
+    line-height: 1.4;
   }
 
-  .a24-quantity__button:hover {
-    border-color: #000000;
-    background-color: rgba(0, 0, 0, 0.05);
+  .a24-quantity__number:hover {
+    color: #000000;
   }
 
-  .a24-quantity__button.active {
-    background-color: #000000;
-    color: #f1f1f1;
-    border-color: #000000;
+  .a24-quantity__number.active {
+    color: #000000;
+    border-bottom-color: #000000;
+    font-weight: 600;
   }
 
-  .a24-quantity__button:focus {
-    outline: none; /* Remove default outline */
+  .a24-quantity__number:focus {
+    outline: none;
   }
 
-  .a24-quantity__button:focus-visible {
+  .a24-quantity__number:focus-visible {
     outline: 2px solid #000000;
-    outline-offset: 2px;
-    z-index: 1; /* Ensure focus ring is visible above adjacent buttons */
-  }
-
-  /* Keyboard focus indicator (for better accessibility) */
-  .a24-quantity__button:focus-visible::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border: 2px solid #000000;
-    pointer-events: none;
-  }
-
-  /* Ensure active + focused state is clear */
-  .a24-quantity__button.active:focus-visible {
-    outline-color: #f1f1f1;
-  }
-
-  .a24-quantity__button.active:focus-visible::after {
-    border-color: #f1f1f1;
+    outline-offset: 4px;
   }
 
   /* ============================================
-     Add to Cart Button
+     Add to Cart Button (A24 Style - Outlined)
      ============================================ */
   
   .a24-add-to-cart {
-    width: 100%;
-    padding: var(--a24-space-2, 20px) var(--a24-space-3, 30px);
-    font-family: var(--a24-font-family);
-    font-size: var(--a24-small-size, 0.875rem);
+    padding: 20px 48px;
+    font-family: inherit;
+    font-size: 0.875rem; /* 14px */
     font-weight: 400;
-    letter-spacing: var(--a24-ls-wide, 0.02em);
+    letter-spacing: 0.02em;
     text-transform: uppercase;
-    color: #f1f1f1;
-    background-color: #000000;
+    color: #000000;
+    background-color: transparent;
     border: 1px solid #000000;
     border-radius: 0;
     cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s ease;
+    white-space: nowrap;
   }
 
   .a24-add-to-cart:hover:not(:disabled) {
-    background-color: #787878;
-    border-color: #787878;
+    background-color: #000000;
+    color: #f1f1f1;
   }
 
   .a24-add-to-cart:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    border-color: #a8a8a8;
+    color: #a8a8a8;
   }
 
   .a24-add-to-cart:focus-visible {
@@ -343,35 +261,22 @@
   
   @media screen and (max-width: 749px) {
     .a24-purchase-bar__content {
-      gap: var(--a24-space-2, 20px);
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
 
-    .a24-pricing__regular {
-      font-size: 2rem; /* Smaller on mobile */
+    .a24-quantity__numbers {
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .a24-pricing__member-price {
-      font-size: 1.25rem;
-    }
-
-    .a24-quantity__buttons {
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
+    .a24-quantity__number {
+      font-size: 1rem;
     }
 
     .a24-add-to-cart {
-      padding: var(--a24-space-2, 20px);
-    }
-  }
-
-  /* ============================================
-     Tablet Adjustments
-     ============================================ */
-  
-  @media screen and (min-width: 750px) and (max-width: 1023px) {
-    .a24-quantity__buttons {
-      grid-template-columns: repeat(9, 1fr);
-      gap: 6px;
+      width: 100%;
+      padding: 16px 24px;
     }
   }
 
@@ -384,55 +289,55 @@
     if (!purchaseBar) return;
 
     // Quantity selector
-    const quantityButtons = purchaseBar.querySelectorAll('[data-quantity-button]');
+    const quantityNumbers = purchaseBar.querySelectorAll('[data-quantity-button]');
     const quantityInput = purchaseBar.querySelector('[data-quantity-input]');
-    const quantityButtonsContainer = purchaseBar.querySelector('[data-quantity-buttons]');
+    const quantityNumbersContainer = purchaseBar.querySelector('[data-quantity-buttons]');
 
-    if (!quantityButtons.length || !quantityInput) return;
+    if (!quantityNumbers.length || !quantityInput) return;
 
     // Convert NodeList to Array for easier manipulation
-    const buttonsArray = Array.from(quantityButtons);
+    const numbersArray = Array.from(quantityNumbers);
 
     /**
      * Update quantity selection
-     * @param {HTMLElement} button - The button to activate
+     * @param {HTMLElement} number - The number button to activate
      */
-    function selectQuantity(button) {
-      const quantity = button.dataset.quantity;
+    function selectQuantity(number) {
+      const quantity = number.dataset.quantity;
       
       // Update active state and ARIA attributes
-      buttonsArray.forEach(btn => {
-        const isSelected = btn === button;
-        btn.classList.toggle('active', isSelected);
-        btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        btn.setAttribute('tabindex', isSelected ? '0' : '-1');
+      numbersArray.forEach(num => {
+        const isSelected = num === number;
+        num.classList.toggle('active', isSelected);
+        num.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+        num.setAttribute('tabindex', isSelected ? '0' : '-1');
       });
       
       // Update hidden input
       quantityInput.value = quantity;
       
-      // Focus the selected button
-      button.focus();
+      // Focus the selected number
+      number.focus();
     }
 
     /**
-     * Get the index of the currently selected button
-     * @returns {number} Index of active button
+     * Get the index of the currently selected number
+     * @returns {number} Index of active number
      */
     function getCurrentIndex() {
-      return buttonsArray.findIndex(btn => btn.classList.contains('active'));
+      return numbersArray.findIndex(num => num.classList.contains('active'));
     }
 
     // Click handler
-    quantityButtons.forEach(button => {
-      button.addEventListener('click', function(e) {
+    quantityNumbers.forEach(number => {
+      number.addEventListener('click', function(e) {
         e.preventDefault();
         selectQuantity(this);
       });
     });
 
     // Keyboard navigation (roving tabindex)
-    quantityButtonsContainer.addEventListener('keydown', function(e) {
+    quantityNumbersContainer.addEventListener('keydown', function(e) {
       const currentIndex = getCurrentIndex();
       let newIndex = currentIndex;
 
@@ -440,41 +345,41 @@
         case 'ArrowRight':
         case 'ArrowDown':
           e.preventDefault();
-          newIndex = (currentIndex + 1) % buttonsArray.length;
-          selectQuantity(buttonsArray[newIndex]);
+          newIndex = (currentIndex + 1) % numbersArray.length;
+          selectQuantity(numbersArray[newIndex]);
           break;
 
         case 'ArrowLeft':
         case 'ArrowUp':
           e.preventDefault();
-          newIndex = (currentIndex - 1 + buttonsArray.length) % buttonsArray.length;
-          selectQuantity(buttonsArray[newIndex]);
+          newIndex = (currentIndex - 1 + numbersArray.length) % numbersArray.length;
+          selectQuantity(numbersArray[newIndex]);
           break;
 
         case 'Home':
           e.preventDefault();
-          selectQuantity(buttonsArray[0]);
+          selectQuantity(numbersArray[0]);
           break;
 
         case 'End':
           e.preventDefault();
-          selectQuantity(buttonsArray[buttonsArray.length - 1]);
+          selectQuantity(numbersArray[numbersArray.length - 1]);
           break;
 
         case ' ':
         case 'Enter':
           e.preventDefault();
-          // Re-select current button (in case user wants to confirm)
-          selectQuantity(buttonsArray[currentIndex]);
+          // Re-select current number (in case user wants to confirm)
+          selectQuantity(numbersArray[currentIndex]);
           break;
       }
     });
 
-    // Ensure only one button is tabbable on page load
-    const activeButton = buttonsArray.find(btn => btn.classList.contains('active'));
-    if (activeButton) {
-      buttonsArray.forEach(btn => {
-        btn.setAttribute('tabindex', btn === activeButton ? '0' : '-1');
+    // Ensure only one number is tabbable on page load
+    const activeNumber = numbersArray.find(num => num.classList.contains('active'));
+    if (activeNumber) {
+      numbersArray.forEach(num => {
+        num.setAttribute('tabindex', num === activeNumber ? '0' : '-1');
       });
     }
   })();

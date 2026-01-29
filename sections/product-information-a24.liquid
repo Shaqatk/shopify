@@ -47,23 +47,28 @@
     
     {%- comment -%} LEFT COLUMN: Product Details (sticky) {%- endcomment -%}
     <div class="product-information-a24__left">
+      {%- comment -%} A24 Pricing Display (before product details) {%- endcomment -%}
+      <div class="product-information-a24__pricing">
+        {% render 'a24-pricing-display' %}
+      </div>
+      
       {{ product_details }}
     </div>
 
-    {%- comment -%} RIGHT COLUMN: Purchase Bar (sticky) + Media Stack (scrolls) {%- endcomment -%}
+    {%- comment -%} RIGHT COLUMN: Media Stack (top) + Purchase Bar (bottom) {%- endcomment -%}
     <div class="product-information-a24__right">
       
-      {%- comment -%} Purchase Bar (Phase 3 Complete) {%- endcomment -%}
-      <div class="product-information-a24__purchase-bar">
-        {% render 'a24-purchase-bar' %}
-      </div>
-
-      {%- comment -%} Media Stack {%- endcomment -%}
+      {%- comment -%} Media Stack (scrolls) {%- endcomment -%}
       {% if product_has_media %}
         <div class="product-information-a24__media">
           {{ media_gallery }}
         </div>
       {% endif %}
+
+      {%- comment -%} Purchase Bar at BOTTOM (A24 style) {%- endcomment -%}
+      <div class="product-information-a24__purchase-bar">
+        {% render 'a24-purchase-bar' %}
+      </div>
       
     </div>
 
@@ -131,27 +136,35 @@
     display: none;
   }
 
-  /* RIGHT COLUMN: Purchase Bar + Media */
+  /* Hide price block from left column (we use custom A24 pricing) */
+  .product-information-a24__left .price {
+    display: none;
+  }
+
+  /* A24 Pricing Display */
+  .product-information-a24__pricing {
+    margin-bottom: 32px;
+  }
+
+  /* RIGHT COLUMN: Media + Purchase Bar */
   .product-information-a24__right {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 48px;
     max-width: var(--a24-right-max-width);
     width: 100%;
   }
 
-  /* Purchase Bar (sticky within right column) */
+  /* Purchase Bar (at bottom of right column, NOT sticky on desktop) */
   .product-information-a24__purchase-bar {
-    position: sticky;
-    top: calc(var(--a24-header-offset) + var(--a24-sticky-top));
+    position: relative;
     z-index: 10;
-    background: #f1f1f1;
-    border: 1px solid #a8a8a8;
+    background: transparent;
+    border: none;
     border-radius: 0;
-    padding: 20px 24px;
-    /* Subtle shadow for depth */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    margin-bottom: 4px;
+    padding: 0;
+    max-width: 500px; /* Narrower like A24 */
+    width: 100%;
   }
 
   .a24-purchase-bar__content {
