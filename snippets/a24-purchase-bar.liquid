@@ -15,8 +15,24 @@
   
   # Check if product has selling plans (subscriptions)
   assign has_selling_plans = false
+  assign monthly_plan = null
   if product.selling_plan_groups.size > 0
     assign has_selling_plans = true
+    # Find monthly selling plan
+    for selling_plan_group in product.selling_plan_groups
+      for selling_plan in selling_plan_group.selling_plans
+        if selling_plan.name contains 'month' or selling_plan.name contains 'Month'
+          assign monthly_plan = selling_plan
+          break
+        endif
+      endfor
+    endfor
+  endif
+  
+  # Calculate subscription price
+  if monthly_plan
+    assign subscription_price = variant.price | times: monthly_plan.price_adjustments.first.value | divided_by: 100.0
+    assign savings_percent = monthly_plan.price_adjustments.first.value | abs
   endif
   
   # Get initial quantity
@@ -54,74 +70,32 @@
       
       <div class="a24-purchase-bar__content">
         
-        {%- comment -%} SUBSCRIPTION SELECTOR {%- endcomment -%}
-        {% if has_selling_plans %}
-          <div class="a24-subscription-selector" data-a24-subscription>
-            <div class="a24-subscription__options">
-              {%- comment -%} One-time purchase option {%- endcomment -%}
-              <label class="a24-subscription__option">
-                <input
-                  type="radio"
-                  name="purchase_option"
-                  value="onetime"
-                  checked
-                  class="a24-subscription__radio"
-                  data-onetime-radio
-                >
-                <span class="a24-subscription__label">
-                  <span class="a24-subscription__title">One-time purchase</span>
-                  <span class="a24-subscription__price">{{ variant.price | money }}</span>
-                </span>
-              </label>
-              
-              {%- comment -%} Subscribe & save option {%- endcomment -%}
-              <label class="a24-subscription__option">
-                <input
-                  type="radio"
-                  name="purchase_option"
-                  value="subscription"
-                  class="a24-subscription__radio"
-                  data-subscription-radio
-                >
-                <span class="a24-subscription__label">
-                  <span class="a24-subscription__title">Subscribe & save</span>
-                  {% if product.selling_plan_groups.first.selling_plans.first %}
-                    {% assign first_plan = product.selling_plan_groups.first.selling_plans.first %}
-                    {% assign subscription_price = variant.price | times: first_plan.price_adjustments.first.value | divided_by: 100.0 %}
-                    <span class="a24-subscription__price">
-                      {{ subscription_price | money }}
-                      <span class="a24-subscription__savings">(Save {{ first_plan.price_adjustments.first.value }}%)</span>
-                    </span>
-                  {% endif %}
-                </span>
-              </label>
+        {%- comment -%} PRICING DISPLAY (A24 Style) {%- endcomment -%}
+        <div class="a24-pricing">
+          {%- comment -%} Regular Price {%- endcomment -%}
+          <div class="a24-pricing__regular">
+            {{ variant.price | money }}
+          </div>
+          
+          {%- comment -%} Member Price (if subscription available) {%- endcomment -%}
+          {% if has_selling_plans and monthly_plan %}
+            <div class="a24-pricing__member">
+              <span class="a24-pricing__member-price">{{ subscription_price | money }}</span>
+              <span class="a24-pricing__member-text">
+                Members save {{ savings_percent }}% 
+                <a href="/pages/aaa24" class="a24-pricing__join-link">Join us →</a>
+              </span>
             </div>
             
-            {%- comment -%} Cadence dropdown (shown when subscription is selected) {%- endcomment -%}
-            <div class="a24-subscription__cadence" data-cadence-selector style="display: none;">
-              <label for="a24-cadence-{{ section.id }}" class="a24-subscription__cadence-label">
-                Delivery frequency
-              </label>
-              <select
-                id="a24-cadence-{{ section.id }}"
-                name="selling_plan"
-                class="a24-subscription__cadence-select"
-                data-selling-plan-select
-              >
-                {% for selling_plan_group in product.selling_plan_groups %}
-                  {% for selling_plan in selling_plan_group.selling_plans %}
-                    <option
-                      value="{{ selling_plan.id }}"
-                      data-price-adjustment="{{ selling_plan.price_adjustments.first.value }}"
-                    >
-                      {{ selling_plan.name }}
-                    </option>
-                  {% endfor %}
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-        {% endif %}
+            {%- comment -%} Hidden input for selling plan {%- endcomment -%}
+            <input
+              type="hidden"
+              name="selling_plan"
+              value="{{ monthly_plan.id }}"
+              data-selling-plan-input
+            >
+          {% endif %}
+        </div>
         
         {%- comment -%} QUANTITY SELECTOR (1-9 buttons, A24 style) {%- endcomment -%}
         <div class="a24-quantity-selector" data-a24-quantity>
@@ -182,120 +156,58 @@
   }
 
   /* ============================================
-     Subscription Selector
+     Pricing Display (A24 Style)
      ============================================ */
   
-  .a24-subscription-selector {
+  .a24-pricing {
     display: flex;
     flex-direction: column;
-    gap: var(--a24-space-2, 20px);
+    gap: 8px;
   }
 
-  .a24-subscription__options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--a24-space, 10px);
+  /* Regular Price */
+  .a24-pricing__regular {
+    font-size: 2.625rem; /* 42px - H2 size */
+    font-weight: 700;
+    letter-spacing: -0.0375em;
+    line-height: 1;
+    color: #000000;
   }
 
-  .a24-subscription__option {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--a24-space, 10px);
-    padding: var(--a24-space-2, 20px);
-    border: 1px solid #a8a8a8;
-    cursor: pointer;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-  }
-
-  .a24-subscription__option:hover {
-    border-color: #000000;
-  }
-
-  .a24-subscription__option:has(input:checked) {
-    border-color: #000000;
-    background-color: rgba(0, 0, 0, 0.02);
-  }
-
-  .a24-subscription__radio {
-    margin-top: 2px;
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-
-  .a24-subscription__label {
+  /* Member/Subscription Price */
+  .a24-pricing__member {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    flex: 1;
-    cursor: pointer;
   }
 
-  .a24-subscription__title {
-    font-size: var(--a24-small-size, 0.875rem);
-    font-weight: 600;
-    letter-spacing: var(--a24-ls-wide, 0.02em);
-    text-transform: uppercase;
-    color: #000000;
-  }
-
-  .a24-subscription__price {
-    font-size: var(--a24-h4-size, 1.125rem);
-    font-weight: 700;
-    letter-spacing: var(--a24-ls-normal, -0.01em);
-    color: #000000;
-  }
-
-  .a24-subscription__savings {
-    font-size: var(--a24-small-size, 0.875rem);
+  .a24-pricing__member-price {
+    font-size: 1.6875rem; /* 27px - slightly smaller than regular */
     font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #787878; /* Grey color like in image */
+  }
+
+  .a24-pricing__member-text {
+    font-size: 0.6875rem; /* 11px - tiny size */
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: #000000;
+  }
+
+  .a24-pricing__join-link {
+    color: #000000;
+    text-decoration: none;
+    border-bottom: 1px solid #000000;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .a24-pricing__join-link:hover {
     color: #787878;
-    margin-left: 8px;
-  }
-
-  /* Cadence Dropdown */
-  .a24-subscription__cadence {
-    display: flex;
-    flex-direction: column;
-    gap: var(--a24-space, 10px);
-  }
-
-  .a24-subscription__cadence-label {
-    font-size: var(--a24-tiny-size, 0.6875rem);
-    font-weight: 600;
-    letter-spacing: var(--a24-ls-wider, 0.04em);
-    text-transform: uppercase;
-    color: #000000;
-  }
-
-  .a24-subscription__cadence-select {
-    width: 100%;
-    padding: var(--a24-space-2, 20px);
-    font-family: var(--a24-font-family);
-    font-size: var(--a24-small-size, 0.875rem);
-    font-weight: 400;
-    letter-spacing: var(--a24-ls-wide, 0.02em);
-    text-transform: uppercase;
-    color: #000000;
-    background-color: #f1f1f1;
-    border: 1px solid #a8a8a8;
-    border-radius: 0;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23000000' stroke-width='2' stroke-linecap='square'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 20px center;
-    padding-right: 50px;
-  }
-
-  .a24-subscription__cadence-select:hover {
-    border-color: #000000;
-  }
-
-  .a24-subscription__cadence-select:focus {
-    outline: 2px solid #000000;
-    outline-offset: 2px;
+    border-color: #787878;
   }
 
   /* ============================================
@@ -398,13 +310,17 @@
       gap: var(--a24-space-2, 20px);
     }
 
+    .a24-pricing__regular {
+      font-size: 2rem; /* Smaller on mobile */
+    }
+
+    .a24-pricing__member-price {
+      font-size: 1.25rem;
+    }
+
     .a24-quantity__buttons {
       grid-template-columns: repeat(5, 1fr);
       gap: 6px;
-    }
-
-    .a24-subscription__option {
-      padding: var(--a24-space, 10px) var(--a24-space-2, 20px);
     }
 
     .a24-add-to-cart {
@@ -449,40 +365,5 @@
         }
       });
     });
-
-    // Subscription selector
-    const subscriptionRadios = purchaseBar.querySelectorAll('[data-onetime-radio], [data-subscription-radio]');
-    const cadenceSelector = purchaseBar.querySelector('[data-cadence-selector]');
-    const sellingPlanSelect = purchaseBar.querySelector('[data-selling-plan-select]');
-    const subscriptionRadio = purchaseBar.querySelector('[data-subscription-radio]');
-    const onetimeRadio = purchaseBar.querySelector('[data-onetime-radio]');
-
-    if (subscriptionRadios.length > 0) {
-      subscriptionRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-          if (this.value === 'subscription' && cadenceSelector) {
-            cadenceSelector.style.display = 'flex';
-            if (sellingPlanSelect) {
-              sellingPlanSelect.required = true;
-            }
-          } else if (cadenceSelector) {
-            cadenceSelector.style.display = 'none';
-            if (sellingPlanSelect) {
-              sellingPlanSelect.required = false;
-              sellingPlanSelect.value = '';
-            }
-          }
-        });
-      });
-    }
-
-    // Update price when cadence changes
-    if (sellingPlanSelect) {
-      sellingPlanSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const priceAdjustment = selectedOption.dataset.priceAdjustment;
-        // Price update logic can be added here if needed
-      });
-    }
   })();
 </script>
