@@ -99,14 +99,25 @@
         
         {%- comment -%} QUANTITY SELECTOR (1-9 buttons, A24 style) {%- endcomment -%}
         <div class="a24-quantity-selector" data-a24-quantity>
-          <span class="a24-quantity__label">Quantity</span>
-          <div class="a24-quantity__buttons">
+          <span class="a24-quantity__label" id="a24-quantity-label-{{ section.id }}">
+            Quantity
+          </span>
+          <div 
+            class="a24-quantity__buttons" 
+            role="radiogroup" 
+            aria-labelledby="a24-quantity-label-{{ section.id }}"
+            data-quantity-buttons
+          >
             {% for i in (1..9) %}
               <button
                 type="button"
+                role="radio"
                 class="a24-quantity__button{% if i == initial_quantity %} active{% endif %}"
                 data-quantity="{{ i }}"
                 data-quantity-button
+                aria-checked="{% if i == initial_quantity %}true{% else %}false{% endif %}"
+                aria-label="Quantity {{ i }}"
+                tabindex="{% if i == initial_quantity %}0{% else %}-1{% endif %}"
               >
                 {{ i }}
               </button>
@@ -117,6 +128,7 @@
             name="quantity"
             value="{{ initial_quantity }}"
             data-quantity-input
+            aria-hidden="true"
           >
         </div>
         
@@ -235,6 +247,7 @@
   }
 
   .a24-quantity__button {
+    position: relative; /* For focus ring pseudo-element */
     aspect-ratio: 1;
     min-width: 0;
     padding: 0;
@@ -261,9 +274,32 @@
     border-color: #000000;
   }
 
+  .a24-quantity__button:focus {
+    outline: none; /* Remove default outline */
+  }
+
   .a24-quantity__button:focus-visible {
     outline: 2px solid #000000;
     outline-offset: 2px;
+    z-index: 1; /* Ensure focus ring is visible above adjacent buttons */
+  }
+
+  /* Keyboard focus indicator (for better accessibility) */
+  .a24-quantity__button:focus-visible::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border: 2px solid #000000;
+    pointer-events: none;
+  }
+
+  /* Ensure active + focused state is clear */
+  .a24-quantity__button.active:focus-visible {
+    outline-color: #f1f1f1;
+  }
+
+  .a24-quantity__button.active:focus-visible::after {
+    border-color: #f1f1f1;
   }
 
   /* ============================================
@@ -342,7 +378,7 @@
 {% endstylesheet %}
 
 <script>
-  // A24 Purchase Bar JavaScript
+  // A24 Purchase Bar JavaScript with Full Accessibility
   (function() {
     const purchaseBar = document.querySelector('[data-a24-purchase-bar]');
     if (!purchaseBar) return;
@@ -350,20 +386,96 @@
     // Quantity selector
     const quantityButtons = purchaseBar.querySelectorAll('[data-quantity-button]');
     const quantityInput = purchaseBar.querySelector('[data-quantity-input]');
+    const quantityButtonsContainer = purchaseBar.querySelector('[data-quantity-buttons]');
 
+    if (!quantityButtons.length || !quantityInput) return;
+
+    // Convert NodeList to Array for easier manipulation
+    const buttonsArray = Array.from(quantityButtons);
+
+    /**
+     * Update quantity selection
+     * @param {HTMLElement} button - The button to activate
+     */
+    function selectQuantity(button) {
+      const quantity = button.dataset.quantity;
+      
+      // Update active state and ARIA attributes
+      buttonsArray.forEach(btn => {
+        const isSelected = btn === button;
+        btn.classList.toggle('active', isSelected);
+        btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+        btn.setAttribute('tabindex', isSelected ? '0' : '-1');
+      });
+      
+      // Update hidden input
+      quantityInput.value = quantity;
+      
+      // Focus the selected button
+      button.focus();
+    }
+
+    /**
+     * Get the index of the currently selected button
+     * @returns {number} Index of active button
+     */
+    function getCurrentIndex() {
+      return buttonsArray.findIndex(btn => btn.classList.contains('active'));
+    }
+
+    // Click handler
     quantityButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const quantity = this.dataset.quantity;
-        
-        // Update active state
-        quantityButtons.forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-        
-        // Update hidden input
-        if (quantityInput) {
-          quantityInput.value = quantity;
-        }
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        selectQuantity(this);
       });
     });
+
+    // Keyboard navigation (roving tabindex)
+    quantityButtonsContainer.addEventListener('keydown', function(e) {
+      const currentIndex = getCurrentIndex();
+      let newIndex = currentIndex;
+
+      switch(e.key) {
+        case 'ArrowRight':
+        case 'ArrowDown':
+          e.preventDefault();
+          newIndex = (currentIndex + 1) % buttonsArray.length;
+          selectQuantity(buttonsArray[newIndex]);
+          break;
+
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          e.preventDefault();
+          newIndex = (currentIndex - 1 + buttonsArray.length) % buttonsArray.length;
+          selectQuantity(buttonsArray[newIndex]);
+          break;
+
+        case 'Home':
+          e.preventDefault();
+          selectQuantity(buttonsArray[0]);
+          break;
+
+        case 'End':
+          e.preventDefault();
+          selectQuantity(buttonsArray[buttonsArray.length - 1]);
+          break;
+
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          // Re-select current button (in case user wants to confirm)
+          selectQuantity(buttonsArray[currentIndex]);
+          break;
+      }
+    });
+
+    // Ensure only one button is tabbable on page load
+    const activeButton = buttonsArray.find(btn => btn.classList.contains('active'));
+    if (activeButton) {
+      buttonsArray.forEach(btn => {
+        btn.setAttribute('tabindex', btn === activeButton ? '0' : '-1');
+      });
+    }
   })();
 </script>
