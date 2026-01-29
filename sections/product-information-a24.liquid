@@ -1,0 +1,310 @@
+{% comment %}
+  Product Information A24
+  
+  A24-style minimal PDP with:
+  - Left column: sticky product details
+  - Right column: sticky purchase bar + scrolling media stack
+  - Subscription support (selling plans)
+{% endcomment %}
+
+<script type="application/ld+json">
+  {{ closest.product | structured_data }}
+</script>
+
+{% liquid
+  # Capture the two main blocks
+  capture media_gallery
+    content_for 'block', type: '_product-media-gallery', id: 'media-gallery', closest.product: closest.product
+  endcapture
+
+  capture product_details
+    content_for 'block', type: '_product-details', id: 'product-details', closest.product: closest.product
+  endcapture
+
+  capture additional_blocks
+    content_for 'blocks'
+  endcapture
+
+  # Check if product has media
+  assign product_has_media = true
+  if closest.product.media.size == 0
+    assign product_has_media = false
+  endif
+
+  # Get current variant for purchase bar
+  assign current_variant = closest.product.selected_or_first_available_variant
+  assign initial_quantity = current_variant.quantity_rule.min | default: 1
+%}
+
+<div class="section-background color-{{ section.settings.color_scheme }}"></div>
+<div
+  class="product-information-a24 section section--full-width spacing-style color-{{ section.settings.color_scheme }} relative"
+  style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
+  data-testid="product-information-a24"
+>
+  <div class="product-information-a24__container">
+    
+    {%- comment -%} LEFT COLUMN: Product Details (sticky) {%- endcomment -%}
+    <div class="product-information-a24__left">
+      {{ product_details }}
+    </div>
+
+    {%- comment -%} RIGHT COLUMN: Purchase Bar (sticky) + Media Stack (scrolls) {%- endcomment -%}
+    <div class="product-information-a24__right">
+      
+      {%- comment -%} Purchase Bar - will be implemented in Phase 3 {%- endcomment -%}
+      <div class="product-information-a24__purchase-bar" data-a24-purchase-bar>
+        <div class="a24-purchase-bar__content">
+          {%- comment -%} Placeholder for Phase 3: subscription selector, quantity, ATC {%- endcomment -%}
+          <div class="a24-purchase-bar__placeholder">
+            <p style="font-size: 0.875rem; color: #999; text-align: center; padding: 1rem;">
+              Purchase bar (Phase 3)
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} Media Stack {%- endcomment -%}
+      {% if product_has_media %}
+        <div class="product-information-a24__media">
+          {{ media_gallery }}
+        </div>
+      {% endif %}
+      
+    </div>
+
+  </div>
+
+  {{ additional_blocks }}
+</div>
+
+{% stylesheet %}
+  /* ============================================
+     A24 PDP Layout Styles
+     ============================================ */
+  
+  .product-information-a24 {
+    --a24-gap: var(--gap, 48px);
+    --a24-left-width: 400px;
+    --a24-purchase-bar-height: auto;
+    --a24-header-offset: var(--header-height, 0px);
+  }
+
+  .product-information-a24__container {
+    display: grid;
+    grid-template-columns: var(--a24-left-width) 1fr;
+    gap: var(--a24-gap);
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--padding-lg, 24px);
+  }
+
+  /* LEFT COLUMN: Sticky Details */
+  .product-information-a24__left {
+    position: sticky;
+    top: calc(var(--a24-header-offset) + 24px);
+    align-self: flex-start;
+    max-height: calc(100vh - var(--a24-header-offset) - 48px);
+    overflow-y: auto;
+  }
+
+  /* RIGHT COLUMN: Purchase Bar + Media */
+  .product-information-a24__right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-height: 100vh; /* Ensure scrolling */
+  }
+
+  /* Purchase Bar (sticky within right column) */
+  .product-information-a24__purchase-bar {
+    position: sticky;
+    top: calc(var(--a24-header-offset) + 24px);
+    z-index: 10;
+    background: var(--color-background);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 24px;
+  }
+
+  .a24-purchase-bar__content {
+    /* Will be styled in Phase 3 */
+  }
+
+  /* Media Stack (scrolls) */
+  .product-information-a24__media {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Override Ritual's media gallery to stack vertically */
+  .product-information-a24__media .media-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .product-information-a24__media .media-gallery__item {
+    width: 100%;
+  }
+
+  /* MOBILE: Single column, purchase bar at bottom */
+  @media screen and (max-width: 749px) {
+    .product-information-a24__container {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      padding: 0 var(--padding-md, 16px);
+    }
+
+    .product-information-a24__left {
+      position: static;
+      max-height: none;
+      order: 1;
+    }
+
+    .product-information-a24__right {
+      order: 0;
+      min-height: auto;
+    }
+
+    .product-information-a24__purchase-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      z-index: 100;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      border-bottom: none;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+      order: 2;
+    }
+
+    .product-information-a24__media {
+      order: 1;
+    }
+  }
+
+  /* TABLET: Adjust left column width */
+  @media screen and (min-width: 750px) and (max-width: 1023px) {
+    .product-information-a24 {
+      --a24-left-width: 320px;
+    }
+  }
+
+  /* If header is sticky, adjust offset */
+  body:has(#header-group #header-component[data-sticky-state='active']) .product-information-a24 {
+    --a24-header-offset: var(--header-height);
+  }
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product Information A24",
+  "class": "section-product-information-a24",
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:content.layout"
+    },
+    {
+      "type": "select",
+      "id": "content_width",
+      "label": "t:settings.width",
+      "options": [
+        {
+          "value": "content-center-aligned",
+          "label": "t:options.page"
+        },
+        {
+          "value": "content-full-width",
+          "label": "t:options.full"
+        }
+      ],
+      "default": "content-full-width"
+    },
+    {
+      "type": "select",
+      "id": "desktop_media_position",
+      "label": "t:settings.media_position",
+      "options": [
+        {
+          "value": "left",
+          "label": "t:options.left"
+        },
+        {
+          "value": "right",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "right",
+      "info": "A24 layout always shows media on right"
+    },
+    {
+      "type": "checkbox",
+      "id": "equal_columns",
+      "label": "t:settings.equal_columns",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "limit_details_width",
+      "label": "t:settings.limit_product_details_width",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "t:settings.gap",
+      "min": 0,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:settings.color_scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:content.padding"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "t:settings.top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "t:settings.bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": []
+}
+{% endschema %}
