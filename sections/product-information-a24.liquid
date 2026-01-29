@@ -7,6 +7,8 @@
   - Subscription support (selling plans)
 {% endcomment %}
 
+{%- render 'a24-design-system' -%}
+
 <script type="application/ld+json">
   {{ closest.product | structured_data }}
 </script>
@@ -36,9 +38,8 @@
   assign initial_quantity = current_variant.quantity_rule.min | default: 1
 %}
 
-<div class="section-background color-{{ section.settings.color_scheme }}"></div>
 <div
-  class="product-information-a24 section section--full-width spacing-style color-{{ section.settings.color_scheme }} relative"
+  class="product-information-a24 section section--full-width spacing-style relative"
   style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
   data-testid="product-information-a24"
 >
@@ -90,6 +91,10 @@
     --a24-purchase-bar-height: auto;
     --a24-header-offset: var(--header-height, 0px);
     --a24-sticky-top: 32px;
+    
+    /* Force A24 background color */
+    background-color: #f1f1f1 !important;
+    color: #000000 !important;
   }
 
   .product-information-a24__container {
@@ -147,8 +152,8 @@
     position: sticky;
     top: calc(var(--a24-header-offset) + var(--a24-sticky-top));
     z-index: 10;
-    background: var(--color-background);
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #f1f1f1;
+    border: 1px solid #a8a8a8;
     border-radius: 0;
     padding: 20px 24px;
     /* Subtle shadow for depth */
