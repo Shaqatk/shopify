@@ -2,6 +2,7 @@
   Product Information A24
   
   A24-style minimal PDP with:
+  - Full-viewport hero section
   - Left column: sticky product details
   - Right column: sticky purchase bar + scrolling media stack
   - Subscription support (selling plans)
@@ -39,6 +40,10 @@
   style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
   data-testid="product-information-a24"
 >
+  {%- comment -%} HERO SECTION - Full viewport {%- endcomment -%}
+  {% render 'a24-product-hero', product: closest.product %}
+  
+  {%- comment -%} MAIN GRID SECTION {%- endcomment -%}
   <div class="product-information-a24__container">
     
     {%- comment -%} LEFT COLUMN: Product Details (sticky at bottom) {%- endcomment -%}

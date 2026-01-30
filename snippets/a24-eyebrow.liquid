@@ -1,0 +1,54 @@
+{% comment %}
+  A24 Eyebrow Component
+  
+  Small uppercase label with optional border-top divider.
+  Used for section headers like "Description", "More Info", "Back in Stock", etc.
+  
+  Usage: 
+    {% render 'a24-eyebrow', text: 'Description' %}
+    {% render 'a24-eyebrow', text: 'Back in Stock', border: false %}
+  
+  Parameters:
+    - text: The label text (required)
+    - border: Show top border (default: true)
+    - class: Additional CSS classes
+{% endcomment %}
+
+{% liquid
+  assign text = text | default: ''
+  assign show_border = border | default: true
+  assign extra_class = class | default: ''
+%}
+
+{% if text != blank %}
+  <div class="a24-eyebrow-wrapper {{ extra_class }}">
+    <span class="a24-eyebrow {% unless show_border %}a24-eyebrow--no-border{% endunless %}">
+      {{ text }}
+    </span>
+  </div>
+{% endif %}
+
+<style>
+  .a24-eyebrow-wrapper {
+    width: 100%;
+  }
+  
+  .a24-eyebrow {
+    display: block;
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif);
+    font-size: 0.6875rem; /* 11px */
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--a24-color-text, #000000);
+    padding-top: var(--a24-space, 10px);
+    margin-bottom: var(--a24-space, 10px);
+    border-top: 1px solid var(--a24-color-divider, #000000);
+  }
+  
+  .a24-eyebrow--no-border {
+    border-top: none;
+    padding-top: 0;
+  }
+</style>

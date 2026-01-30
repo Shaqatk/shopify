@@ -1,0 +1,305 @@
+{% comment %}
+  A24 Product Hero
+  
+  Full-viewport hero section with:
+  - 2-column layout (info left, image right)
+  - Eyebrow label (optional, e.g., "Back in Stock")
+  - Large H1 product title
+  - Price display
+  - Hero image (main product image)
+  - Mobile description (shown only on mobile)
+  
+  Usage: {% render 'a24-product-hero', product: product %}
+{% endcomment %}
+
+{% liquid
+  assign product = product | default: closest.product
+  assign current_variant = product.selected_or_first_available_variant
+  assign hero_image = product.featured_image
+  
+  # Check for eyebrow text (can be set via metafield or hardcoded)
+  assign eyebrow_text = product.metafields.custom.eyebrow | default: ''
+  
+  # Check inventory for "Back in Stock" messaging
+  if current_variant.available and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= 10
+    assign eyebrow_text = 'Back in Stock'
+  endif
+%}
+
+<section class="a24-hero" data-a24-hero>
+  <div class="a24-hero__container">
+    
+    {%- comment -%} LEFT COLUMN: Product Info {%- endcomment -%}
+    <div class="a24-hero__info">
+      <div class="a24-hero__info-inner">
+        
+        {%- comment -%} Eyebrow Label {%- endcomment -%}
+        {% if eyebrow_text != blank %}
+          <div class="a24-hero__eyebrow">
+            <span class="a24-eyebrow a24-eyebrow--no-border">{{ eyebrow_text }}</span>
+          </div>
+        {% endif %}
+        
+        {%- comment -%} Product Title (H1) {%- endcomment -%}
+        <h1 class="a24-hero__title">{{ product.title }}</h1>
+        
+        {%- comment -%} Price Display {%- endcomment -%}
+        <div class="a24-hero__prices">
+          <div class="a24-hero__price a24-price">
+            {{ current_variant.price | money }}
+          </div>
+          
+          {% if current_variant.compare_at_price > current_variant.price %}
+            <div class="a24-hero__compare-price a24-text-light">
+              <s>{{ current_variant.compare_at_price | money }}</s>
+            </div>
+          {% endif %}
+        </div>
+        
+        {%- comment -%} Mobile Description (hidden on desktop) {%- endcomment -%}
+        {% if product.description != blank %}
+          <div class="a24-hero__description a24-show-mobile-only">
+            <div class="a24-eyebrow">Description</div>
+            <div class="a24-hero__description-text a24-body">
+              {{ product.description | strip_html | truncate: 200 }}
+            </div>
+          </div>
+        {% endif %}
+        
+      </div>
+    </div>
+    
+    {%- comment -%} RIGHT COLUMN: Hero Image {%- endcomment -%}
+    <div class="a24-hero__media">
+      {% if hero_image %}
+        <div class="a24-hero__image-wrapper">
+          <img
+            src="{{ hero_image | image_url: width: 1200 }}"
+            srcset="{{ hero_image | image_url: width: 600 }} 600w,
+                    {{ hero_image | image_url: width: 900 }} 900w,
+                    {{ hero_image | image_url: width: 1200 }} 1200w,
+                    {{ hero_image | image_url: width: 1800 }} 1800w"
+            sizes="(max-width: 666px) 100vw, 50vw"
+            alt="{{ hero_image.alt | default: product.title | escape }}"
+            width="{{ hero_image.width }}"
+            height="{{ hero_image.height }}"
+            loading="eager"
+            fetchpriority="high"
+            class="a24-hero__image"
+          >
+        </div>
+      {% else %}
+        <div class="a24-hero__image-wrapper a24-hero__image-wrapper--placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'a24-hero__placeholder' }}
+        </div>
+      {% endif %}
+    </div>
+    
+  </div>
+</section>
+
+<style>
+  /* ============================================
+     A24 PRODUCT HERO STYLES
+     ============================================ */
+  
+  .a24-hero {
+    min-height: max(calc(100vh - var(--product-bar-outer-height, 120px)), 37.5rem);
+    background-color: var(--a24-color-bg, #f1f1f1);
+    padding-bottom: calc(var(--a24-space, 10px) * 4);
+  }
+  
+  .a24-hero__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-height: inherit;
+    padding-left: var(--col-gutter, 3vw);
+    padding-right: var(--col-gutter, 3vw);
+  }
+  
+  /* LEFT COLUMN: Info */
+  .a24-hero__info {
+    width: calc(2 * var(--col-width, 25vw));
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: calc(var(--a24-space, 10px) * 4);
+    padding-right: var(--col-gutter, 3vw);
+  }
+  
+  .a24-hero__info-inner {
+    max-width: 100%;
+  }
+  
+  /* Eyebrow */
+  .a24-hero__eyebrow {
+    margin-bottom: calc(var(--a24-space, 10px) * 2);
+  }
+  
+  .a24-hero__eyebrow .a24-eyebrow {
+    border-top: none;
+    padding-top: 0;
+  }
+  
+  /* Title - Large H1 */
+  .a24-hero__title {
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif);
+    font-size: 5.25rem;
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 0.87;
+    margin: 0;
+    margin-left: -0.025em;
+    text-transform: none;
+    color: var(--a24-color-text, #000000);
+  }
+  
+  /* Prices */
+  .a24-hero__prices {
+    display: flex;
+    align-items: baseline;
+    gap: calc(var(--a24-space, 10px) * 2);
+    margin-top: calc(var(--a24-space, 10px) * 3);
+  }
+  
+  .a24-hero__price {
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.1em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  
+  .a24-hero__compare-price {
+    font-size: 1.25rem;
+    color: var(--a24-color-text-light, #a8a8a8);
+  }
+  
+  /* Mobile Description */
+  .a24-hero__description {
+    margin-top: calc(var(--a24-space, 10px) * 4);
+  }
+  
+  .a24-hero__description-text {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.19;
+  }
+  
+  /* RIGHT COLUMN: Media */
+  .a24-hero__media {
+    width: calc(2 * var(--col-width, 25vw));
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  
+  .a24-hero__image-wrapper {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .a24-hero__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+  }
+  
+  .a24-hero__placeholder {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+  
+  /* ============================================
+     RESPONSIVE - TABLET
+     ============================================ */
+  
+  @media screen and (min-width: 667px) and (max-width: 1150px) {
+    .a24-hero__title {
+      font-size: 4rem;
+    }
+    
+    .a24-hero__price {
+      font-size: 1.75rem;
+    }
+    
+    .a24-hero__info {
+      width: calc(1.5 * var(--col-width, 25vw));
+    }
+    
+    .a24-hero__media {
+      width: calc(2.5 * var(--col-width, 25vw));
+    }
+  }
+  
+  /* ============================================
+     RESPONSIVE - MOBILE
+     ============================================ */
+  
+  @media screen and (max-width: 666px) {
+    .a24-hero {
+      min-height: auto;
+      padding: calc(var(--a24-space, 10px) * 2) 0;
+    }
+    
+    .a24-hero__container {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0 16px;
+    }
+    
+    .a24-hero__info {
+      width: 100%;
+      order: 2;
+      padding: calc(var(--a24-space, 10px) * 2) 0;
+      padding-right: 0;
+    }
+    
+    .a24-hero__media {
+      width: 100%;
+      order: 1;
+    }
+    
+    .a24-hero__image-wrapper {
+      aspect-ratio: 1 / 1;
+    }
+    
+    .a24-hero__title {
+      font-size: 2.5rem;
+      letter-spacing: -0.0475em;
+    }
+    
+    .a24-hero__prices {
+      margin-top: calc(var(--a24-space, 10px) * 2);
+    }
+    
+    .a24-hero__price {
+      font-size: 1.5rem;
+    }
+    
+    .a24-hero__description {
+      display: block;
+    }
+    
+    /* Show mobile description */
+    .a24-show-mobile-only {
+      display: block !important;
+    }
+  }
+  
+  /* Hide mobile description on desktop */
+  @media screen and (min-width: 667px) {
+    .a24-hero__description.a24-show-mobile-only {
+      display: none !important;
+    }
+  }
+</style>
