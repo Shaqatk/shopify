@@ -1,0 +1,129 @@
+{% comment %}
+  A24 Phase 1 Test Component
+  
+  Temporary snippet to test the design system foundation.
+  Shows typography, colors, grid, and spacing.
+  
+  Usage: Add {% render 'a24-test-phase1' %} to any page to test.
+  Remove after Phase 1 testing is complete.
+{% endcomment %}
+
+<div class="product-information-a24" style="padding: 40px;">
+  <div class="a24-test-typography">
+    
+    <!-- Color Palette Test -->
+    <div class="a24-eyebrow">Color Palette</div>
+    <div style="display: flex; gap: 20px; margin-bottom: 40px;">
+      <div style="width: 100px; height: 100px; background: var(--a24-color-bg); border: 1px solid #000;">
+        <span style="font-size: 11px; padding: 8px; display: block;">BG<br>#f1f1f1</span>
+      </div>
+      <div style="width: 100px; height: 100px; background: var(--a24-color-text); color: #fff;">
+        <span style="font-size: 11px; padding: 8px; display: block;">Text<br>#000000</span>
+      </div>
+      <div style="width: 100px; height: 100px; background: var(--a24-color-text-grey); color: #fff;">
+        <span style="font-size: 11px; padding: 8px; display: block;">Grey<br>#787878</span>
+      </div>
+      <div style="width: 100px; height: 100px; background: var(--a24-color-text-light); color: #fff;">
+        <span style="font-size: 11px; padding: 8px; display: block;">Light<br>#a8a8a8</span>
+      </div>
+      <div style="width: 100px; height: 100px; background: var(--a24-color-member); color: #fff;">
+        <span style="font-size: 11px; padding: 8px; display: block;">Member<br>#83887c</span>
+      </div>
+    </div>
+    
+    <!-- Typography Scale Test -->
+    <div class="a24-eyebrow">Typography Scale</div>
+    
+    <h1 class="a24-test-typography__hero">Hero Title (84px)</h1>
+    
+    <div class="a24-test-typography__price">$22.00</div>
+    
+    <div class="a24-test-typography__eyebrow">Eyebrow Label (11px)</div>
+    
+    <p class="a24-test-typography__body">
+      Body text at 16px with -0.01em letter-spacing and 1.19 line-height. 
+      This is how product descriptions and general content will appear on the A24 product page.
+      The typography system uses NB International Web font with fallbacks to Inter and Helvetica Neue.
+    </p>
+    
+    <p class="a24-text-small a24-text-grey">
+      Small text (14px) in grey color - used for captions and secondary information.
+    </p>
+    
+    <!-- Button Test -->
+    <div class="a24-eyebrow" style="margin-top: 40px;">Buttons & CTA</div>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 40px;">
+      <button class="a24-cta">Add to Cart</button>
+      <button class="a24-cta a24-cta--filled">In Cart</button>
+      <button class="a24-cta" disabled>Sold Out</button>
+    </div>
+    
+    <!-- Quantity Selector Test -->
+    <div class="a24-eyebrow">Quantity Selector</div>
+    
+    <div class="a24-quantity-selector" style="margin-bottom: 40px;">
+      <button class="a24-quantity-option is-active">1</button>
+      <button class="a24-quantity-option">2</button>
+      <button class="a24-quantity-option">3</button>
+      <button class="a24-quantity-option">4</button>
+      <button class="a24-quantity-option">5</button>
+      <button class="a24-quantity-option">6</button>
+      <button class="a24-quantity-option">7</button>
+      <button class="a24-quantity-option">8</button>
+      <button class="a24-quantity-option">9</button>
+    </div>
+    
+    <!-- Spacing Scale Test -->
+    <div class="a24-eyebrow">Spacing Scale (--space = 10px)</div>
+    
+    <div style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 40px;">
+      <div style="width: var(--a24-space); height: var(--a24-space); background: #000;"></div>
+      <div style="width: var(--a24-space-2); height: var(--a24-space-2); background: #000;"></div>
+      <div style="width: var(--a24-space-3); height: var(--a24-space-3); background: #000;"></div>
+      <div style="width: var(--a24-space-4); height: var(--a24-space-4); background: #000;"></div>
+      <div style="width: var(--a24-space-6); height: var(--a24-space-6); background: #000;"></div>
+      <div style="width: var(--a24-space-8); height: var(--a24-space-8); background: #000;"></div>
+    </div>
+    <p class="a24-text-small a24-text-grey">10px, 20px, 30px, 40px, 60px, 80px</p>
+    
+    <!-- Grid System Test -->
+    <div class="a24-eyebrow" style="margin-top: 40px;">4-Column Grid System</div>
+    
+  </div>
+  
+  <!-- Grid Test (full width) -->
+  <div class="a24-grid a24-test-grid" style="margin-top: 20px;">
+    <div class="a24-col-1 a24-test-grid__col">Col 1 (25%)</div>
+    <div class="a24-col-3 a24-test-grid__col">Col 3 (75%)</div>
+  </div>
+  
+  <div class="a24-grid a24-test-grid" style="margin-top: 10px;">
+    <div class="a24-col-2 a24-test-grid__col">Col 2 (50%)</div>
+    <div class="a24-col-2 a24-test-grid__col">Col 2 (50%)</div>
+  </div>
+  
+  <div class="a24-grid a24-test-grid" style="margin-top: 10px;">
+    <div class="a24-col-1 a24-test-grid__col">1</div>
+    <div class="a24-col-1 a24-test-grid__col">1</div>
+    <div class="a24-col-1 a24-test-grid__col">1</div>
+    <div class="a24-col-1 a24-test-grid__col">1</div>
+  </div>
+  
+  <!-- Divider Test -->
+  <div style="padding: 0 40px;">
+    <div class="a24-divider"></div>
+    <p class="a24-text-small a24-text-grey" style="text-align: center;">
+      Phase 1 Complete - Grid System, Typography, Colors, Spacing ✓
+    </p>
+  </div>
+  
+</div>
+
+<style>
+  /* Ensure test component takes full width */
+  .product-information-a24 {
+    width: 100%;
+    min-height: 100vh;
+  }
+</style>

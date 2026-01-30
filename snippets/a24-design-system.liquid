@@ -1,67 +1,177 @@
 {% comment %}
-  A24 Design System
+  A24 Design System - Phase 1: Foundation
   
-  Applies A24's visual design language to the A24 PDP template:
-  - Colors: Light grey background (#f1f1f1), black text
-  - Typography: NB International (fallback to system sans)
-  - Spacing: Based on --space unit (0.625rem)
+  Complete A24 visual design language including:
+  - 4-column grid system with CSS variables
+  - Typography: NB International (fallback to Inter, Helvetica Neue)
+  - Spacing: Based on --space unit (0.625rem / 10px)
+  - Color palette: Light grey background, black text
   - Minimal aesthetic with tight letter-spacing
+  
+  Reference: https://a24films.com/shop/
 {% endcomment %}
 
 {% stylesheet %}
   /* ============================================
-     A24 Design System Variables
+     A24 DESIGN SYSTEM - PHASE 1 FOUNDATION
      ============================================ */
   
+  /* --------------------------------------------
+     1. CSS CUSTOM PROPERTIES (Design Tokens)
+     -------------------------------------------- */
+  
+  :root {
+    /* Scrollbar width detection (used for layout calculations) */
+    --scrollbar-width: 0px;
+  }
+  
   .product-information-a24 {
-    /* A24 Color Palette */
+    /* ==========================================
+       A24 COLOR PALETTE
+       ========================================== */
     --a24-color-bg: #f1f1f1;
     --a24-color-text: #000000;
-    --a24-color-text-hover: #787878;
-    --a24-color-divider: #a8a8a8;
+    --a24-color-text-grey: #787878;
+    --a24-color-text-light: #a8a8a8;
+    --a24-color-member: #83887c;
+    --a24-color-divider: #000000;
+    --a24-color-divider-light: #a8a8a8;
     
-    /* A24 Spacing System */
-    --a24-space: 0.625rem; /* 10px base */
-    --a24-space-2: calc(var(--a24-space) * 2); /* 20px */
-    --a24-space-3: calc(var(--a24-space) * 3); /* 30px */
-    --a24-space-4: calc(var(--a24-space) * 4); /* 40px */
-    --a24-space-6: calc(var(--a24-space) * 6); /* 60px */
-    --a24-space-8: calc(var(--a24-space) * 8); /* 80px */
+    /* Semantic color aliases */
+    --color-bg: var(--a24-color-bg);
+    --color-text: var(--a24-color-text);
     
-    /* A24 Typography Scale */
-    --a24-font-family: 'NB International Web', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --a24-font-mono: 'NB International Mono Web', 'Courier New', Courier, Monaco, monospace;
+    /* ==========================================
+       A24 GRID SYSTEM (4-Column)
+       ========================================== */
     
-    /* A24 Type Sizes */
-    --a24-h1-size: 5.25rem; /* 84px */
-    --a24-h2-size: 2.625rem; /* 42px */
-    --a24-h3-size: 2.25rem; /* 36px */
-    --a24-h4-size: 1.125rem; /* 18px */
-    --a24-body-size: 1rem; /* 16px */
-    --a24-small-size: 0.875rem; /* 14px */
-    --a24-tiny-size: 0.6875rem; /* 11px */
+    /* Base spacing unit: 10px */
+    --space: 0.625rem;
     
-    /* A24 Letter Spacing */
-    --a24-ls-tight: -0.055em;
-    --a24-ls-medium: -0.0375em;
-    --a24-ls-normal: -0.01em;
-    --a24-ls-wide: 0.02em;
-    --a24-ls-wider: 0.04em;
+    /* Column gutters - responsive */
+    --col-gutter: 3vw;
+    --col-gutter-outer-left: var(--col-gutter);
+    --col-gutter-outer-right: var(--col-gutter);
     
-    /* A24 Line Heights */
-    --a24-lh-tight: 0.87;
-    --a24-lh-snug: 1;
-    --a24-lh-normal: 1.19;
+    /* Window width minus scrollbar */
+    --win-width: calc(100vw - var(--scrollbar-width));
     
-    /* Override Ritual colors with A24 palette */
+    /* Column width calculation: (viewport - 2 gutters) / 4 columns */
+    --col-width: calc((var(--win-width) - (2 * var(--col-gutter))) / 4);
+    
+    /* Product bar dimensions */
+    --product-bar-vert-offset: calc(var(--space) * 3); /* 30px */
+    --product-bar-inner-height: var(--cta-height, 60px);
+    --product-bar-outer-height: calc(var(--product-bar-inner-height) + (var(--product-bar-vert-offset) * 2));
+    --product-bar-bot-margin: calc(var(--space) * 4); /* 40px */
+    
+    /* CTA button height */
+    --cta-height: 60px;
+    
+    /* ==========================================
+       A24 SPACING SCALE
+       ========================================== */
+    --a24-space: var(--space);
+    --a24-space-2: calc(var(--space) * 2);  /* 20px */
+    --a24-space-3: calc(var(--space) * 3);  /* 30px */
+    --a24-space-4: calc(var(--space) * 4);  /* 40px */
+    --a24-space-5: calc(var(--space) * 5);  /* 50px */
+    --a24-space-6: calc(var(--space) * 6);  /* 60px */
+    --a24-space-8: calc(var(--space) * 8);  /* 80px */
+    --a24-space-10: calc(var(--space) * 10); /* 100px */
+    
+    /* ==========================================
+       A24 TYPOGRAPHY
+       ========================================== */
+    
+    /* Font families */
+    --a24-font-family: 'NB International Web', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --a24-font-mono: 'NB International Mono Web', 'SF Mono', 'Consolas', 'Courier New', monospace;
+    
+    /* Type scale */
+    --a24-text-hero: 5.25rem;      /* 84px - Hero H1 */
+    --a24-text-h1: 3.5rem;          /* 56px - Section titles */
+    --a24-text-h2: 2.625rem;        /* 42px - Large headings */
+    --a24-text-h3: 2.25rem;         /* 36px - Medium headings */
+    --a24-text-h4: 1.6875rem;       /* 27px - CTA buttons, quantity */
+    --a24-text-price: 2rem;         /* 32px - Price display */
+    --a24-text-body: 1rem;          /* 16px - Body text */
+    --a24-text-small: 0.875rem;     /* 14px - Small text */
+    --a24-text-eyebrow: 0.6875rem;  /* 11px - Labels, eyebrows */
+    
+    /* Letter spacing */
+    --a24-ls-hero: -0.055em;        /* Hero titles */
+    --a24-ls-tight: -0.0375em;      /* Headings */
+    --a24-ls-price: -0.1em;         /* Prices (monospace) */
+    --a24-ls-body: -0.01em;         /* Body text */
+    --a24-ls-cta: -0.025em;         /* CTA buttons */
+    --a24-ls-wide: 0.02em;          /* Slight wide */
+    --a24-ls-eyebrow: 0.04em;       /* Eyebrow/labels */
+    
+    /* Line heights */
+    --a24-lh-hero: 0.87;            /* Hero titles */
+    --a24-lh-tight: 0.95;           /* Headings */
+    --a24-lh-snug: 1;               /* Single line elements */
+    --a24-lh-body: 1.19;            /* Body text */
+    --a24-lh-relaxed: 1.4;          /* Readable paragraphs */
+    
+    /* Font weights */
+    --a24-weight-regular: 400;
+    --a24-weight-medium: 500;
+    --a24-weight-semibold: 600;
+    --a24-weight-bold: 700;
+    
+    /* ==========================================
+       BASE STYLES
+       ========================================== */
     background-color: var(--a24-color-bg);
     color: var(--a24-color-text);
   }
-
-  /* ============================================
-     A24 Typography Styles
-     ============================================ */
   
+  /* --------------------------------------------
+     2. A24 GRID HELPER CLASSES
+     -------------------------------------------- */
+  
+  /* Main grid container - flex-based like A24 */
+  .a24-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-left: calc(var(--col-gutter-outer-left) + var(--col-gutter));
+    padding-right: var(--col-gutter-outer-right);
+  }
+  
+  /* Grid with items aligned to bottom */
+  .a24-grid--align-end {
+    align-items: flex-end;
+  }
+  
+  /* Grid with items centered */
+  .a24-grid--align-center {
+    align-items: center;
+  }
+  
+  /* Column sizing classes */
+  .a24-col-1 { width: calc(1 * var(--col-width)); }
+  .a24-col-2 { width: calc(2 * var(--col-width)); }
+  .a24-col-3 { width: calc(3 * var(--col-width)); }
+  .a24-col-4 { width: calc(4 * var(--col-width)); }
+  
+  /* Column with gutter */
+  .a24-col-1-gutter { width: calc(1 * var(--col-width) - var(--col-gutter)); }
+  .a24-col-2-gutter { width: calc(2 * var(--col-width) - var(--col-gutter)); }
+  .a24-col-3-gutter { width: calc(3 * var(--col-width) - var(--col-gutter)); }
+  
+  /* Flex column that takes remaining space */
+  .a24-col-flex {
+    flex: 1 1 auto;
+  }
+
+  /* --------------------------------------------
+     3. A24 TYPOGRAPHY STYLES
+     -------------------------------------------- */
+  
+  /* Base font application */
   .product-information-a24,
   .product-information-a24 * {
     font-family: var(--a24-font-family);
@@ -69,68 +179,177 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-
-  /* Product Title (H1) */
+  
+  /* Hero Title (H1) - Large product title in hero section */
+  .product-information-a24 .a24-hero__title,
+  .product-information-a24 h1.a24-title-hero {
+    font-size: var(--a24-text-hero);
+    font-weight: var(--a24-weight-bold);
+    letter-spacing: var(--a24-ls-hero);
+    line-height: var(--a24-lh-hero);
+    margin: 0;
+    color: var(--a24-color-text);
+  }
+  
+  /* Standard H1 - Section headings */
   .product-information-a24__left h1,
   .product-information-a24__left .text--h1 {
-    font-size: var(--a24-h2-size); /* Use H2 size for product titles */
-    font-weight: 700;
-    letter-spacing: var(--a24-ls-medium);
-    line-height: var(--a24-lh-snug);
+    font-size: var(--a24-text-h2);
+    font-weight: var(--a24-weight-bold);
+    letter-spacing: var(--a24-ls-tight);
+    line-height: var(--a24-lh-tight);
     margin: 0 0 var(--a24-space-2) 0;
     color: var(--a24-color-text);
   }
-
-  /* Product Subtitle / Eyebrow */
+  
+  /* Eyebrow / Label - Small uppercase text with border-top */
+  .product-information-a24 .a24-eyebrow {
+    display: block;
+    font-size: var(--a24-text-eyebrow);
+    font-weight: var(--a24-weight-semibold);
+    letter-spacing: var(--a24-ls-eyebrow);
+    line-height: var(--a24-lh-snug);
+    text-transform: uppercase;
+    color: var(--a24-color-text);
+    padding-top: var(--a24-space);
+    margin-bottom: var(--a24-space);
+    border-top: 1px solid var(--a24-color-divider);
+  }
+  
+  /* Eyebrow without border */
+  .product-information-a24 .a24-eyebrow--no-border {
+    border-top: none;
+    padding-top: 0;
+  }
+  
+  /* Legacy eyebrow support */
   .product-information-a24__left .eyebrow,
   .product-information-a24__left h6 {
-    font-size: var(--a24-tiny-size);
-    font-weight: 600;
-    letter-spacing: var(--a24-ls-wider);
+    font-size: var(--a24-text-eyebrow);
+    font-weight: var(--a24-weight-semibold);
+    letter-spacing: var(--a24-ls-eyebrow);
     line-height: var(--a24-lh-snug);
     text-transform: uppercase;
     color: var(--a24-color-text);
     margin-bottom: var(--a24-space);
   }
 
-  /* Price */
+  /* Price - Main price display */
+  .product-information-a24 .a24-price {
+    font-family: var(--a24-font-mono);
+    font-size: var(--a24-text-price);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-price);
+    line-height: var(--a24-lh-snug);
+    color: var(--a24-color-text);
+  }
+  
+  /* Member price - Subdued color */
+  .product-information-a24 .a24-price--member {
+    color: var(--a24-color-member);
+  }
+  
+  /* Legacy price support */
   .product-information-a24__left .price,
   .product-information-a24 .price {
-    font-size: var(--a24-h4-size);
-    font-weight: 700;
-    letter-spacing: var(--a24-ls-normal);
+    font-size: var(--a24-text-body);
+    font-weight: var(--a24-weight-medium);
+    letter-spacing: var(--a24-ls-body);
     line-height: var(--a24-lh-snug);
     color: var(--a24-color-text);
   }
 
   /* Body Text / Description */
   .product-information-a24__left p,
-  .product-information-a24__left .rte {
-    font-size: var(--a24-body-size);
-    font-weight: 400;
-    letter-spacing: var(--a24-ls-normal);
-    line-height: var(--a24-lh-normal);
+  .product-information-a24__left .rte,
+  .product-information-a24 .a24-body {
+    font-size: var(--a24-text-body);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-body);
+    line-height: var(--a24-lh-body);
     color: var(--a24-color-text);
     margin-bottom: 1.2em;
   }
 
-  .product-information-a24__left p:last-child {
+  .product-information-a24__left p:last-child,
+  .product-information-a24 .a24-body:last-child {
     margin-bottom: 0;
+  }
+  
+  /* CTA / Button text */
+  .product-information-a24 .a24-cta-text {
+    font-size: var(--a24-text-h4);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-cta);
+    line-height: var(--a24-lh-snug);
+    text-transform: none;
+  }
+  
+  /* Quantity selector numbers */
+  .product-information-a24 .a24-quantity-text {
+    font-size: var(--a24-text-h4);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-cta);
+    line-height: var(--a24-lh-snug);
+  }
+  
+  /* Small text / captions */
+  .product-information-a24 .a24-text-small {
+    font-size: var(--a24-text-small);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-body);
+    line-height: var(--a24-lh-body);
+  }
+  
+  /* Grey text modifier */
+  .product-information-a24 .a24-text-grey {
+    color: var(--a24-color-text-grey);
+  }
+  
+  /* Light grey text modifier */
+  .product-information-a24 .a24-text-light {
+    color: var(--a24-color-text-light);
   }
 
   /* Variant Options */
   .product-information-a24 .variant-picker label,
   .product-information-a24 .variant-picker .variant-option {
-    font-size: var(--a24-small-size);
-    font-weight: 400;
+    font-size: var(--a24-text-small);
+    font-weight: var(--a24-weight-regular);
     letter-spacing: var(--a24-ls-wide);
     text-transform: uppercase;
     color: var(--a24-color-text);
   }
 
-  /* ============================================
-     A24 Spacing & Layout Refinements
-     ============================================ */
+  /* --------------------------------------------
+     4. A24 SPACING & LAYOUT UTILITIES
+     -------------------------------------------- */
+  
+  /* Spacing utility classes */
+  .a24-mt-1 { margin-top: var(--a24-space); }
+  .a24-mt-2 { margin-top: var(--a24-space-2); }
+  .a24-mt-3 { margin-top: var(--a24-space-3); }
+  .a24-mt-4 { margin-top: var(--a24-space-4); }
+  .a24-mb-1 { margin-bottom: var(--a24-space); }
+  .a24-mb-2 { margin-bottom: var(--a24-space-2); }
+  .a24-mb-3 { margin-bottom: var(--a24-space-3); }
+  .a24-mb-4 { margin-bottom: var(--a24-space-4); }
+  
+  /* Padding utility classes */
+  .a24-pt-1 { padding-top: var(--a24-space); }
+  .a24-pt-2 { padding-top: var(--a24-space-2); }
+  .a24-pt-3 { padding-top: var(--a24-space-3); }
+  .a24-pt-4 { padding-top: var(--a24-space-4); }
+  .a24-pb-1 { padding-bottom: var(--a24-space); }
+  .a24-pb-2 { padding-bottom: var(--a24-space-2); }
+  .a24-pb-3 { padding-bottom: var(--a24-space-3); }
+  .a24-pb-4 { padding-bottom: var(--a24-space-4); }
+  
+  /* Gap utility for flex/grid containers */
+  .a24-gap-1 { gap: var(--a24-space); }
+  .a24-gap-2 { gap: var(--a24-space-2); }
+  .a24-gap-3 { gap: var(--a24-space-3); }
+  .a24-gap-4 { gap: var(--a24-space-4); }
   
   /* Tighter spacing between elements */
   .product-information-a24__left .group-block {
@@ -147,15 +366,61 @@
     opacity: 0.3;
   }
 
-  /* ============================================
-     A24 Buttons & Interactive Elements
-     ============================================ */
+  /* --------------------------------------------
+     5. A24 BUTTONS & INTERACTIVE ELEMENTS
+     -------------------------------------------- */
   
+  /* A24 CTA Button - Primary style (outlined, becomes filled on scroll) */
+  .product-information-a24 .a24-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--a24-font-family);
+    font-size: var(--a24-text-h4);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-cta);
+    text-transform: none;
+    background-color: transparent;
+    color: var(--a24-color-text);
+    border: 1px solid var(--a24-color-text);
+    border-radius: 0;
+    padding: calc(var(--a24-space) * 2.8) calc(var(--a24-space) * 7.2);
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    white-space: nowrap;
+    min-height: var(--cta-height);
+  }
+  
+  .product-information-a24 .a24-cta:hover:not(:disabled) {
+    background-color: var(--a24-color-text);
+    color: var(--a24-color-bg);
+  }
+  
+  /* A24 CTA - Filled/Dark state (used when pinned) */
+  .product-information-a24 .a24-cta--filled {
+    background-color: var(--a24-color-text);
+    color: var(--a24-color-bg);
+  }
+  
+  .product-information-a24 .a24-cta--filled:hover:not(:disabled) {
+    background-color: #333333;
+    border-color: #333333;
+  }
+  
+  /* A24 CTA - Disabled state */
+  .product-information-a24 .a24-cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--a24-color-text-light);
+    color: var(--a24-color-text-light);
+  }
+  
+  /* Legacy button support */
   .product-information-a24 button,
   .product-information-a24 .button {
     font-family: var(--a24-font-family);
-    font-size: var(--a24-small-size);
-    font-weight: 400;
+    font-size: var(--a24-text-small);
+    font-weight: var(--a24-weight-regular);
     letter-spacing: var(--a24-ls-wide);
     text-transform: uppercase;
     background-color: var(--a24-color-text);
@@ -168,8 +433,8 @@
 
   .product-information-a24 button:hover,
   .product-information-a24 .button:hover {
-    background-color: var(--a24-color-text-hover);
-    border-color: var(--a24-color-text-hover);
+    background-color: var(--a24-color-text-grey);
+    border-color: var(--a24-color-text-grey);
     color: var(--a24-color-bg);
   }
 
@@ -177,7 +442,7 @@
   .product-information-a24 .button--secondary {
     background-color: transparent;
     color: var(--a24-color-text);
-    border: 1px solid var(--a24-color-divider);
+    border: 1px solid var(--a24-color-divider-light);
   }
 
   .product-information-a24 .button--secondary:hover {
@@ -185,13 +450,40 @@
     color: var(--a24-color-bg);
     border-color: var(--a24-color-text);
   }
+  
+  /* Quantity selector styling */
+  .product-information-a24 .a24-quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--a24-space) * 1.5);
+  }
+  
+  .product-information-a24 .a24-quantity-option {
+    font-size: var(--a24-text-h4);
+    font-weight: var(--a24-weight-regular);
+    letter-spacing: var(--a24-ls-cta);
+    color: var(--a24-color-text-light);
+    cursor: pointer;
+    padding: var(--a24-space) calc(var(--a24-space) * 0.5);
+    transition: color 0.2s ease;
+    background: none;
+    border: none;
+  }
+  
+  .product-information-a24 .a24-quantity-option:hover {
+    color: var(--a24-color-text-grey);
+  }
+  
+  .product-information-a24 .a24-quantity-option.is-active {
+    color: var(--a24-color-text);
+  }
 
-  /* ============================================
-     A24 Scrollbar Styling
-     ============================================ */
+  /* --------------------------------------------
+     7. A24 SCROLLBAR STYLING
+     -------------------------------------------- */
   
   .product-information-a24__left {
-    scrollbar-color: var(--a24-color-divider) var(--a24-color-bg);
+    scrollbar-color: var(--a24-color-divider-light) var(--a24-color-bg);
     scrollbar-width: thin;
   }
 
@@ -204,76 +496,251 @@
   }
 
   .product-information-a24__left::-webkit-scrollbar-thumb {
-    background: var(--a24-color-divider);
+    background: var(--a24-color-divider-light);
     border: 2px solid var(--a24-color-bg);
     border-radius: 9px;
   }
 
   .product-information-a24__left::-webkit-scrollbar-thumb:hover {
-    background: #8f8f8f;
+    background: var(--a24-color-text-grey);
   }
 
-  /* ============================================
-     A24 Purchase Bar Styling
-     ============================================ */
+  /* --------------------------------------------
+     8. A24 DIVIDERS & BORDERS
+     -------------------------------------------- */
+  
+  .product-information-a24 .a24-divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--a24-color-divider);
+    margin: var(--a24-space-4) 0;
+  }
+  
+  .product-information-a24 .a24-divider--light {
+    background-color: var(--a24-color-divider-light);
+  }
+  
+  .product-information-a24 .a24-border-top {
+    border-top: 1px solid var(--a24-color-divider);
+  }
+  
+  .product-information-a24 .a24-border-bottom {
+    border-bottom: 1px solid var(--a24-color-divider);
+  }
+
+  /* --------------------------------------------
+     9. A24 PURCHASE BAR BASE STYLES
+     -------------------------------------------- */
   
   .product-information-a24__purchase-bar {
     background-color: var(--a24-color-bg);
-    border: 1px solid var(--a24-color-divider);
+    border: 1px solid var(--a24-color-divider-light);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
-
-  /* ============================================
-     A24 Responsive Typography Scaling
-     ============================================ */
   
-  /* Mobile: Smaller type */
+  /* Product bar CSS custom properties */
+  .product-information-a24 .a24-product-bar {
+    --bar-bg-default: var(--a24-color-bg);
+    --bar-bg-pinned: transparent;
+    --bar-border-color: var(--a24-color-divider);
+  }
+
+  /* --------------------------------------------
+     6. RESPONSIVE BREAKPOINTS & SCALING
+     -------------------------------------------- */
+  
+  /* 
+   * A24 Breakpoints:
+   * - Desktop: min-width: 1151px (full 4-column layout)
+   * - Tablet: 667px - 1150px (3-column, quantity hidden)
+   * - Mobile: max-width: 666px (single column, bottom sticky)
+   */
+  
+  /* MOBILE: max-width 666px */
   @media screen and (max-width: 666px) {
     .product-information-a24 {
-      --a24-h1-size: 4rem;
-      --a24-h2-size: 2rem;
-      --a24-h3-size: 1.75rem;
+      /* Adjusted grid for mobile */
+      --col-gutter: 16px;
+      --col-width: calc((100vw - 32px) / 2);
+      
+      /* Scaled typography */
+      --a24-text-hero: 2.5rem;        /* 40px */
+      --a24-text-h1: 2rem;            /* 32px */
+      --a24-text-h2: 1.75rem;         /* 28px */
+      --a24-text-h3: 1.5rem;          /* 24px */
+      --a24-text-h4: 1.25rem;         /* 20px */
+      --a24-text-price: 1.5rem;       /* 24px */
     }
 
-    .product-information-a24__left h1 {
-      font-size: var(--a24-h2-size);
+    .product-information-a24__left h1,
+    .product-information-a24__left .text--h1 {
+      font-size: var(--a24-text-h2);
       letter-spacing: -0.0475em;
     }
+    
+    /* Hide desktop-only grid classes */
+    .a24-hide-mobile {
+      display: none !important;
+    }
   }
-
-  /* Tablet: Slightly smaller */
-  @media screen and (max-width: 1150px) and (min-width: 667px) {
-    .product-information-a24 {
-      font-size: 87.5%;
+  
+  /* Show mobile-only elements on mobile */
+  @media screen and (min-width: 667px) {
+    .a24-show-mobile-only {
+      display: none !important;
     }
   }
 
-  /* Large Desktop: Scale up */
+  /* TABLET: 667px - 1150px */
+  @media screen and (min-width: 667px) and (max-width: 1150px) {
+    .product-information-a24 {
+      /* Adjusted grid for tablet */
+      --col-gutter: 2.5vw;
+      --col-width: calc((100vw - (3 * var(--col-gutter))) / 3);
+      
+      /* Slightly smaller type */
+      --a24-text-hero: 4rem;          /* 64px */
+      --a24-text-h1: 3rem;            /* 48px */
+      --a24-text-h2: 2.25rem;         /* 36px */
+      --a24-text-h4: 1.5rem;          /* 24px */
+    }
+    
+    /* Hide tablet-hidden elements */
+    .a24-hide-tablet {
+      display: none !important;
+    }
+  }
+
+  /* LARGE DESKTOP: min-width 1550px */
   @media screen and (min-width: 1550px) {
     .product-information-a24 {
-      font-size: 110%;
+      /* Larger type for big screens */
+      --a24-text-hero: 6rem;          /* 96px */
+      --a24-text-h1: 4rem;            /* 64px */
+      --a24-text-price: 2.25rem;      /* 36px */
     }
   }
 
-  /* Extra Large: Scale up more */
+  /* EXTRA LARGE: min-width 2000px */
   @media screen and (min-width: 2000px) {
     .product-information-a24 {
-      font-size: 130%;
+      --a24-text-hero: 7rem;          /* 112px */
+      --a24-text-h1: 4.5rem;          /* 72px */
+      --a24-text-price: 2.5rem;       /* 40px */
+      --col-gutter: 4vw;
     }
   }
 
-  /* ============================================
-     A24 Selection Styling
-     ============================================ */
+  /* --------------------------------------------
+     10. A24 SELECTION & FOCUS STYLING
+     -------------------------------------------- */
   
   .product-information-a24 ::selection {
-    background: var(--a24-color-divider);
+    background: var(--a24-color-text);
     color: var(--a24-color-bg);
   }
 
   .product-information-a24 ::-moz-selection {
-    background: var(--a24-color-divider);
+    background: var(--a24-color-text);
     color: var(--a24-color-bg);
+  }
+  
+  /* Focus styles for accessibility */
+  .product-information-a24 *:focus-visible {
+    outline: 2px solid var(--a24-color-text);
+    outline-offset: 2px;
+  }
+
+  /* --------------------------------------------
+     11. A24 ANIMATION & TRANSITION UTILITIES
+     -------------------------------------------- */
+  
+  .product-information-a24 .a24-transition-opacity {
+    transition: opacity 0.3s ease;
+  }
+  
+  .product-information-a24 .a24-transition-color {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  .product-information-a24 .a24-transition-transform {
+    transition: transform 0.3s ease;
+  }
+  
+  .product-information-a24 .a24-transition-all {
+    transition: all 0.3s ease;
+  }
+  
+  /* Fade utilities */
+  .product-information-a24 .a24-fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .product-information-a24 .a24-fade-in {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* --------------------------------------------
+     12. A24 PHASE 1 TEST STYLES
+     (For visual testing - can remove after Phase 6)
+     -------------------------------------------- */
+  
+  /* Test container for typography preview */
+  .a24-test-typography {
+    padding: var(--a24-space-4);
+    background: var(--a24-color-bg);
+    max-width: 800px;
+  }
+  
+  .a24-test-typography__hero {
+    font-size: var(--a24-text-hero);
+    font-weight: var(--a24-weight-bold);
+    letter-spacing: var(--a24-ls-hero);
+    line-height: var(--a24-lh-hero);
+    margin-bottom: var(--a24-space-4);
+  }
+  
+  .a24-test-typography__price {
+    font-family: var(--a24-font-mono);
+    font-size: var(--a24-text-price);
+    letter-spacing: var(--a24-ls-price);
+    margin-bottom: var(--a24-space-2);
+  }
+  
+  .a24-test-typography__eyebrow {
+    font-size: var(--a24-text-eyebrow);
+    font-weight: var(--a24-weight-semibold);
+    letter-spacing: var(--a24-ls-eyebrow);
+    text-transform: uppercase;
+    padding-top: var(--a24-space);
+    border-top: 1px solid var(--a24-color-divider);
+    margin-bottom: var(--a24-space-4);
+  }
+  
+  .a24-test-typography__body {
+    font-size: var(--a24-text-body);
+    letter-spacing: var(--a24-ls-body);
+    line-height: var(--a24-lh-body);
+    margin-bottom: var(--a24-space-3);
+  }
+  
+  /* Test grid visualization */
+  .a24-test-grid {
+    background: var(--a24-color-bg);
+    padding: var(--a24-space-4) 0;
+  }
+  
+  .a24-test-grid__col {
+    background: rgba(0, 0, 0, 0.05);
+    padding: var(--a24-space-2);
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--a24-text-small);
+    color: var(--a24-color-text-grey);
   }
 
 {% endstylesheet %}
