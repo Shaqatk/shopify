@@ -1,0 +1,58 @@
+{% comment %}
+  A24 Quantity Selector
+  
+  Horizontal row of numbers 1-9 for quantity selection.
+  Used in the product bar. JS (a24-product.js) wires clicks to the hidden input.
+  
+  Usage:
+    {% render 'a24-selector', initial_quantity: 1, section_id: section.id %}
+  
+  Parameters:
+    - initial_quantity: Default selected quantity (1-9). Default: 1
+    - input_name: Name for the hidden input. Default: 'quantity'
+    - section_id: Section id for aria-labelledby. Optional
+{% endcomment %}
+
+{% liquid
+  assign initial_quantity = initial_quantity | default: 1
+  assign initial_quantity = initial_quantity | at_least: 1
+  assign initial_quantity = initial_quantity | at_most: 9
+  assign input_name = input_name | default: 'quantity'
+  assign section_id = section_id | default: ''
+  assign label_id = 'a24-quantity-label'
+  if section_id != blank
+    assign label_id = label_id | append: '-' | append: section_id
+  endif
+%}
+
+<div class="a24-selector" data-a24-quantity-selector>
+  {% render 'a24-eyebrow', text: 'Quantity', border: false %}
+  <div
+    class="a24-selector__numbers a24-quantity-selector"
+    role="radiogroup"
+    aria-labelledby="{{ label_id }}"
+    data-quantity-buttons
+  >
+    <span id="{{ label_id }}" class="visually-hidden">Quantity</span>
+    {% for i in (1..9) %}
+      <button
+        type="button"
+        role="radio"
+        class="a24-qty-num {% if i == initial_quantity %}is-active{% endif %}"
+        data-quantity="{{ i }}"
+        aria-checked="{% if i == initial_quantity %}true{% else %}false{% endif %}"
+        aria-label="Quantity {{ i }}"
+        tabindex="{% if i == initial_quantity %}0{% else %}-1{% endif %}"
+      >
+        {{ i }}
+      </button>
+    {% endfor %}
+  </div>
+  <input
+    type="hidden"
+    name="{{ input_name }}"
+    value="{{ initial_quantity }}"
+    data-quantity-input
+    aria-hidden="true"
+  >
+</div>

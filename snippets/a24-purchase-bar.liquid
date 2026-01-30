@@ -1,538 +1,69 @@
 {% comment %}
-  A24 Purchase Bar
+  A24 Purchase Bar - Phase 4
   
-  Sticky purchase bar for A24 PDP with:
-  - Quantity selector (1-9 buttons, A24 style)
-  - Add to cart button (optional via show_button param)
+  Sticky purchase bar with:
+  - Quantity selector (1-9 via a24-selector)
+  - Add to Cart / Sold Out / In Cart button
   
-  @param {boolean} show_button - Whether to show the Add to Cart button (default: true)
+  Default state: light background, outlined button.
+  Pinned state (.state-pinned): transparent bar, dark button, quantity hidden on tablet.
+  JS: assets/a24-product.js (Intersection Observer, quantity wiring, add to cart).
+  
+  Usage (from section):
+    {% render 'a24-purchase-bar', product: product, section: section %}
 {% endcomment %}
 
 {% liquid
-  assign product = closest.product
-  assign variant = product.selected_or_first_available_variant
-  
-  # Default show_button to true if not specified
-  unless show_button == false
-    assign show_button = true
-  endunless
-  
-  # Check if product has selling plans (subscriptions)
-  assign has_selling_plans = false
-  assign monthly_plan = null
-  if product.selling_plan_groups.size > 0
-    assign has_selling_plans = true
-    # Find monthly selling plan
-    for selling_plan_group in product.selling_plan_groups
-      for selling_plan in selling_plan_group.selling_plans
-        if selling_plan.name contains 'month' or selling_plan.name contains 'Month'
-          assign monthly_plan = selling_plan
-          break
-        endif
-      endfor
-    endfor
-  endif
-  
-  # Calculate subscription price
-  if monthly_plan
-    assign subscription_price = variant.price | times: monthly_plan.price_adjustments.first.value | divided_by: 100.0
-    assign savings_percent = monthly_plan.price_adjustments.first.value | abs
-  endif
-  
-  # Get initial quantity
-  assign initial_quantity = variant.quantity_rule.min | default: 1
-  
-  # Check availability
-  assign can_add_to_cart = false
-  assign add_to_cart_text = 'products.product.unavailable' | t
-  
-  if variant.available
-    assign can_add_to_cart = true
-    assign add_to_cart_text = 'products.product.add_to_cart' | t
+  assign product = product | default: closest.product
+  assign section = section | default: nil
+  assign current_variant = product.selected_or_first_available_variant
+  assign initial_quantity = current_variant.quantity_rule.min | default: 1
+  assign initial_quantity = initial_quantity | at_least: 1
+  assign initial_quantity = initial_quantity | at_most: 9
+  assign form_id = 'A24-ProductForm-'
+  if section
+    assign form_id = form_id | append: section.id
   else
-    assign add_to_cart_text = 'products.product.sold_out' | t
+    assign form_id = form_id | append: product.id
   endif
 %}
 
-<div class="a24-purchase-bar" data-a24-purchase-bar>
-  {%- assign product_form_id = 'A24-ProductForm-' | append: section.id -%}
-  
-  <product-form-component
-    data-section-id="{{ section.id }}"
-    data-product-id="{{ product.id }}"
-    data-product-url="{{ product.url }}"
-    on:submit="/handleSubmit"
-    data-quantity-default="{{ initial_quantity }}"
+<div class="a24-product-bar" data-a24-product-bar>
+  <form
+    method="post"
+    action="/cart/add"
+    id="{{ form_id }}"
+    class="a24-product-bar__form"
+    data-product-form
   >
-    {%- form 'product', product, id: product_form_id, data-type: 'add-to-cart-form', class: 'a24-purchase-form' -%}
-      <input
-        type="hidden"
-        name="id"
-        ref="variantId"
-        value="{{ variant.id }}"
-      >
-      
-      {%- comment -%} Hidden selling plan input (if available) {%- endcomment -%}
-      {% if has_selling_plans and monthly_plan %}
-        <input
-          type="hidden"
-          name="selling_plan"
-          value="{{ monthly_plan.id }}"
-          data-selling-plan-input
-        >
-      {% endif %}
-      
-      <div class="a24-purchase-bar__content">
-        
-        {%- comment -%} QUANTITY SELECTOR (A24 style - plain numbers) {%- endcomment -%}
-        <div class="a24-quantity-selector" data-a24-quantity>
-          <div class="a24-quantity__header">
-            <span class="a24-quantity__label" id="a24-quantity-label-{{ section.id }}">
-              QUANTITY
-            </span>
-          </div>
-          <div 
-            class="a24-quantity__numbers" 
-            role="radiogroup" 
-            aria-labelledby="a24-quantity-label-{{ section.id }}"
-            data-quantity-buttons
-          >
-            {% for i in (1..9) %}
-              <button
-                type="button"
-                role="radio"
-                class="a24-quantity__number{% if i == initial_quantity %} active{% endif %}"
-                data-quantity="{{ i }}"
-                data-quantity-button
-                aria-checked="{% if i == initial_quantity %}true{% else %}false{% endif %}"
-                aria-label="Quantity {{ i }}"
-                tabindex="{% if i == initial_quantity %}0{% else %}-1{% endif %}"
-              >
-                {{ i }}
-              </button>
-            {% endfor %}
-          </div>
-          <input
-            type="hidden"
-            name="quantity"
-            value="{{ initial_quantity }}"
-            data-quantity-input
-            aria-hidden="true"
-          >
-        </div>
-        
-        {%- comment -%} ADD TO CART BUTTON - Only show if show_button is true {%- endcomment -%}
-        {% if show_button %}
-          <div class="a24-button-wrapper" data-a24-button-wrapper>
-            <button
-              type="submit"
-              name="add"
-              class="a24-add-to-cart"
-              {% unless can_add_to_cart %}disabled{% endunless %}
-              data-add-to-cart-button
-            >
-              <span class="a24-add-to-cart__text">IN CART</span>
-            </button>
-          </div>
-        {% endif %}
-        
+    <input type="hidden" name="id" value="{{ current_variant.id }}">
+    
+    <div class="a24-product-bar__inner">
+      <div class="a24-product-bar__quantity">
+        {% render 'a24-selector',
+          initial_quantity: initial_quantity,
+          input_name: 'quantity',
+          section_id: section.id
+        %}
       </div>
-    {%- endform -%}
-  </product-form-component>
-</div>
-
-{%- comment -%} Clone of button for sticky header - hidden, we use position:sticky in section now {%- endcomment -%}
-
-{% stylesheet %}
-  /* ============================================
-     A24 Purchase Bar Styles
-     ============================================ */
-  
-  .a24-purchase-bar {
-    width: 100%;
-  }
-
-  .a24-purchase-form {
-    width: 100%;
-  }
-
-  .a24-purchase-bar__content {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 32px !important;
-    align-items: flex-end !important;
-    justify-content: flex-start !important;
-  }
-
-  /* ============================================
-     Quantity Selector (A24 Style - PLAIN TEXT Numbers)
-     ============================================ */
-  
-  .a24-quantity-selector {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  .a24-quantity__header {
-    border-top: 1px solid #000000 !important;
-    border-bottom: none !important;
-    padding-top: 12px !important;
-    padding-bottom: 0 !important;
-    margin-bottom: 12px !important;
-  }
-
-  .a24-quantity__label {
-    font-size: 0.6875rem !important; /* 11px */
-    font-weight: 500 !important;
-    letter-spacing: 0.08em !important;
-    text-transform: uppercase !important;
-    color: #000000 !important;
-    line-height: 1 !important;
-  }
-
-  .a24-quantity__numbers {
-    display: flex !important;
-    gap: 10px !important;
-    align-items: baseline !important;
-    padding-bottom: 16px !important;
-    border-bottom: 1px solid #000000 !important; /* Line below numbers like A24 */
-  }
-
-  /* PLAIN TEXT - NO BOXES, NO BACKGROUNDS */
-  .a24-quantity__number {
-    position: relative !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: none !important;
-    background-color: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    font-family: inherit !important;
-    font-size: 1.5rem !important; /* 24px - larger like A24 */
-    font-weight: 400 !important;
-    letter-spacing: -0.02em !important;
-    color: #a8a8a8 !important; /* Grey by default */
-    cursor: pointer !important;
-    transition: color 0.15s ease !important;
-    line-height: 1 !important;
-    min-width: auto !important;
-    min-height: auto !important;
-    width: auto !important;
-    height: auto !important;
-    aspect-ratio: unset !important;
-  }
-
-  .a24-quantity__number:hover {
-    color: #000000 !important;
-    background: none !important;
-    background-color: transparent !important;
-  }
-
-  /* Active = bold black text, NO box, NO background */
-  .a24-quantity__number.active {
-    color: #000000 !important;
-    font-weight: 700 !important;
-    background: none !important;
-    background-color: transparent !important;
-    border: none !important;
-  }
-
-  .a24-quantity__number:focus {
-    outline: none !important;
-    background: none !important;
-  }
-
-  .a24-quantity__number:focus-visible {
-    outline: 2px solid #000000 !important;
-    outline-offset: 4px !important;
-    background: none !important;
-  }
-
-  /* ============================================
-     Add to Cart Button (A24 Style - LARGE Outlined)
-     ============================================ */
-  
-  .a24-button-wrapper {
-    flex-shrink: 0;
-  }
-
-  .a24-add-to-cart {
-    padding: 24px 56px !important;
-    font-family: inherit !important;
-    font-size: 0.8125rem !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.1em !important;
-    text-transform: uppercase !important;
-    color: #000000 !important;
-    background-color: transparent !important;
-    border: 1px solid #000000 !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    white-space: nowrap !important;
-    min-width: 180px !important;
-  }
-
-  .a24-add-to-cart:hover:not(:disabled) {
-    background-color: #000000 !important;
-    color: #f1f1f1 !important;
-  }
-
-  .a24-add-to-cart:disabled {
-    opacity: 0.5 !important;
-    cursor: not-allowed !important;
-    border-color: #a8a8a8 !important;
-    color: #a8a8a8 !important;
-  }
-
-  .a24-add-to-cart:focus-visible {
-    outline: 2px solid #000000 !important;
-    outline-offset: 4px !important;
-  }
-
-  /* ============================================
-     STICKY Add to Cart Button (BLACK when sticky)
-     ============================================ */
-  
-  .a24-sticky-button {
-    position: fixed !important;
-    top: 24px !important;
-    right: 40px !important;
-    z-index: 999 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: translateY(-20px) !important;
-    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease !important;
-    pointer-events: none !important;
-  }
-
-  .a24-sticky-button.is-visible {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateY(0) !important;
-    pointer-events: auto !important;
-  }
-
-  /* Sticky button is BLACK filled */
-  .a24-add-to-cart--sticky {
-    padding: 24px 56px !important;
-    font-family: inherit !important;
-    font-size: 0.8125rem !important;
-    font-weight: 400 !important;
-    letter-spacing: 0.1em !important;
-    text-transform: uppercase !important;
-    color: #ffffff !important;
-    background-color: #000000 !important;
-    border: 1px solid #000000 !important;
-    border-radius: 0 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    min-width: 180px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .a24-add-to-cart--sticky:hover {
-    background-color: #333333 !important;
-    border-color: #333333 !important;
-  }
-
-  /* ============================================
-     Mobile Adjustments
-     ============================================ */
-  
-  @media screen and (max-width: 749px) {
-    .a24-purchase-bar__content {
-      flex-direction: column !important;
-      gap: 20px !important;
-      align-items: stretch !important;
-    }
-
-    .a24-quantity__numbers {
-      gap: 10px !important;
-      flex-wrap: wrap !important;
-    }
-
-    .a24-quantity__number {
-      font-size: 1.25rem !important;
-    }
-
-    .a24-add-to-cart {
-      width: 100% !important;
-      padding: 20px 24px !important;
-    }
-
-    /* Hide sticky button on mobile - use fixed bottom bar instead */
-    .a24-sticky-button {
-      display: none !important;
-    }
-  }
-
-  /* Tablet adjustments */
-  @media screen and (min-width: 750px) and (max-width: 1023px) {
-    .a24-sticky-button {
-      right: 24px !important;
-      top: 20px !important;
-    }
-
-    .a24-add-to-cart--sticky {
-      padding: 20px 40px !important;
-      min-width: 160px !important;
-    }
-  }
-
-{% endstylesheet %}
-
-<script>
-  // A24 Purchase Bar JavaScript with Full Accessibility & Sticky Button
-  (function() {
-    const purchaseBar = document.querySelector('[data-a24-purchase-bar]');
-    if (!purchaseBar) return;
-
-    // Elements
-    const quantityNumbers = purchaseBar.querySelectorAll('[data-quantity-button]');
-    const quantityInput = purchaseBar.querySelector('[data-quantity-input]');
-    const quantityNumbersContainer = purchaseBar.querySelector('[data-quantity-buttons]');
-    const originalButton = purchaseBar.querySelector('[data-add-to-cart-button]');
-    const buttonWrapper = purchaseBar.querySelector('[data-a24-button-wrapper]');
-    const stickyButton = document.querySelector('[data-a24-sticky-button]');
-    const stickyButtonElement = stickyButton?.querySelector('[data-sticky-add-to-cart]');
-    const productForm = purchaseBar.querySelector('form');
-
-    // ============================================
-    // QUANTITY SELECTOR
-    // ============================================
-    
-    if (quantityNumbers.length && quantityInput) {
-      const numbersArray = Array.from(quantityNumbers);
-
-      function selectQuantity(number) {
-        const quantity = number.dataset.quantity;
-        numbersArray.forEach(num => {
-          const isSelected = num === number;
-          num.classList.toggle('active', isSelected);
-          num.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-          num.setAttribute('tabindex', isSelected ? '0' : '-1');
-        });
-        quantityInput.value = quantity;
-        number.focus();
-      }
-
-      function getCurrentIndex() {
-        return numbersArray.findIndex(num => num.classList.contains('active'));
-      }
-
-      // Click handler
-      quantityNumbers.forEach(number => {
-        number.addEventListener('click', function(e) {
-          e.preventDefault();
-          selectQuantity(this);
-        });
-      });
-
-      // Keyboard navigation
-      if (quantityNumbersContainer) {
-        quantityNumbersContainer.addEventListener('keydown', function(e) {
-          const currentIndex = getCurrentIndex();
-          let newIndex = currentIndex;
-
-          switch(e.key) {
-            case 'ArrowRight':
-            case 'ArrowDown':
-              e.preventDefault();
-              newIndex = (currentIndex + 1) % numbersArray.length;
-              selectQuantity(numbersArray[newIndex]);
-              break;
-            case 'ArrowLeft':
-            case 'ArrowUp':
-              e.preventDefault();
-              newIndex = (currentIndex - 1 + numbersArray.length) % numbersArray.length;
-              selectQuantity(numbersArray[newIndex]);
-              break;
-            case 'Home':
-              e.preventDefault();
-              selectQuantity(numbersArray[0]);
-              break;
-            case 'End':
-              e.preventDefault();
-              selectQuantity(numbersArray[numbersArray.length - 1]);
-              break;
-            case ' ':
-            case 'Enter':
-              e.preventDefault();
-              selectQuantity(numbersArray[currentIndex]);
-              break;
-          }
-        });
-      }
-
-      // Initialize tabindex
-      const activeNumber = numbersArray.find(num => num.classList.contains('active'));
-      if (activeNumber) {
-        numbersArray.forEach(num => {
-          num.setAttribute('tabindex', num === activeNumber ? '0' : '-1');
-        });
-      }
-    }
-
-    // ============================================
-    // STICKY BUTTON BEHAVIOR
-    // ============================================
-    
-    if (buttonWrapper && stickyButton && stickyButtonElement && productForm) {
       
-      // Make sticky button submit the form
-      stickyButtonElement.addEventListener('click', function(e) {
-        e.preventDefault();
-        // Trigger the original button click to submit the form
-        if (originalButton && !originalButton.disabled) {
-          originalButton.click();
-        }
-      });
-
-      // Intersection Observer to detect when button goes above viewport
-      const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px 0px 0px',
-        threshold: 0
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          // When the button wrapper is NOT intersecting (scrolled past top)
-          // AND it's above the viewport (boundingClientRect.top < 0)
-          const rect = entry.boundingClientRect;
-          
-          if (!entry.isIntersecting && rect.top < 0) {
-            // Button has scrolled past the top - show sticky button
-            stickyButton.classList.add('is-visible');
-          } else {
-            // Button is visible - hide sticky button
-            stickyButton.classList.remove('is-visible');
-          }
-        });
-      }, observerOptions);
-
-      // Observe the button wrapper
-      observer.observe(buttonWrapper);
-
-      // Also handle scroll for more precise control
-      let ticking = false;
-      window.addEventListener('scroll', function() {
-        if (!ticking) {
-          window.requestAnimationFrame(function() {
-            const rect = buttonWrapper.getBoundingClientRect();
-            if (rect.top < 0) {
-              stickyButton.classList.add('is-visible');
-            } else {
-              stickyButton.classList.remove('is-visible');
-            }
-            ticking = false;
-          });
-          ticking = true;
-        }
-      }, { passive: true });
-    }
-  })();
-</script>
+      <div class="a24-product-bar__cta-wrap">
+        <button
+          type="submit"
+          name="add"
+          class="a24-product-bar__cta"
+          {% unless current_variant.available %}disabled{% endunless %}
+          data-add-to-cart-button
+        >
+          <span class="a24-product-bar__cta-text" data-add-to-cart-text>
+            {% if current_variant.available %}
+              Add to Cart
+            {% else %}
+              Sold Out
+            {% endif %}
+          </span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>

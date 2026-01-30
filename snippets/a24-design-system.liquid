@@ -459,7 +459,10 @@
   /* Quantity selector styling - A24 style horizontal number list */
   .product-information-a24 .a24-quantity-selector,
   .a24-quantity-selector {
-    display: block;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
     width: 100%;
     white-space: normal;
     line-height: 1.4;
@@ -469,10 +472,10 @@
   .a24-quantity-option,
   .product-information-a24 .a24-qty-num,
   .a24-qty-num {
-    display: inline;
+    display: inline !important;
     font-family: var(--a24-font-family), 'Zalando Sans', sans-serif;
-    font-size: 1.6875rem;
-    font-weight: 700;
+    font-size: 1.6875rem !important;
+    font-weight: 700 !important;
     letter-spacing: -0.025em;
     line-height: 1;
     color: var(--a24-color-text-light, #a8a8a8);

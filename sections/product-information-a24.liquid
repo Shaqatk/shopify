@@ -2,10 +2,10 @@
   Product Information A24
   
   A24-style minimal PDP with:
-  - Full-viewport hero section
-  - Left column: sticky product details
-  - Right column: sticky purchase bar + scrolling media stack
-  - Subscription support (selling plans)
+  - Full-viewport hero section (Phase 2)
+  - 2-column grid: sticky info (1/4) + media (3/4) (Phase 3)
+  - Sticky purchase bar with quantity selector (Phase 4)
+  - Stacked media gallery (Phase 5)
 {% endcomment %}
 
 {%- render 'a24-design-system' -%}
@@ -15,595 +15,624 @@
 </script>
 
 {% liquid
-  # Capture product details block
-  capture product_details
-    content_for 'block', type: '_product-details', id: 'product-details', closest.product: closest.product
-  endcapture
-
-  capture additional_blocks
-    content_for 'blocks'
-  endcapture
+  # Get product and variant
+  assign product = closest.product
+  assign current_variant = product.selected_or_first_available_variant
+  assign initial_quantity = current_variant.quantity_rule.min | default: 1
 
   # Check if product has media
   assign product_has_media = true
-  if closest.product.media.size == 0
+  if product.media.size == 0
     assign product_has_media = false
   endif
-
-  # Get current variant for purchase bar
-  assign current_variant = closest.product.selected_or_first_available_variant
-  assign initial_quantity = current_variant.quantity_rule.min | default: 1
+  
+  # Check if product has variants
+  assign has_variants = false
+  if product.variants.size > 1
+    assign has_variants = true
+  endif
 %}
 
 <div
-  class="product-information-a24 section section--full-width spacing-style relative"
-  style="{% render 'spacing-style', settings: section.settings %} --gap: {{ section.settings.gap }}px;"
+  class="product-information-a24 section section--full-width spacing-style"
+  style="{% render 'spacing-style', settings: section.settings %}"
   data-testid="product-information-a24"
+  data-product-id="{{ product.id }}"
 >
-  {%- comment -%} HERO SECTION - Full viewport {%- endcomment -%}
-  {% render 'a24-product-hero', product: closest.product %}
+  {%- comment -%} ========================================
+      HERO SECTION - Full viewport (Phase 2)
+      ======================================== {%- endcomment -%}
+  {% render 'a24-product-hero', product: product %}
   
-  {%- comment -%} MAIN GRID SECTION {%- endcomment -%}
-  <div class="product-information-a24__container">
+  {%- comment -%} ========================================
+      MAIN GRID - 1/4 Info + 3/4 Media (Phase 3)
+      ======================================== {%- endcomment -%}
+  <div class="a24-product-grid">
     
-    {%- comment -%} LEFT COLUMN: Product Details (sticky at bottom) {%- endcomment -%}
-    <div class="product-information-a24__left">
-      {%- comment -%} Spacer to push content down (A24 style) {%- endcomment -%}
-      <div class="product-information-a24__spacer"></div>
-      
-      {%- comment -%} Content wrapper {%- endcomment -%}
-      <div class="product-information-a24__left-content">
-        {%- comment -%} A24 Pricing Display (injected after title via CSS order) {%- endcomment -%}
-        <div class="product-information-a24__pricing">
-          {% render 'a24-pricing-display' %}
-        </div>
+    {%- comment -%} LEFT COLUMN: Sticky Info (1/4 width) {%- endcomment -%}
+    <div class="a24-product-grid__info">
+      <div class="a24-product-grid__info-sticky">
         
-        {{ product_details }}
-      </div>
-    </div>
-
-    {%- comment -%} RIGHT COLUMN: First Image → Sticky Cart Bar → Remaining Images {%- endcomment -%}
-    <div class="product-information-a24__right">
-      
-      {% if product_has_media %}
-        {%- comment -%} FIRST IMAGE {%- endcomment -%}
-        {% assign first_media = closest.product.media | first %}
-        <div class="a24-media-item a24-media-item--first">
-          {% if first_media.media_type == 'image' %}
-            <img
-              src="{{ first_media | image_url: width: 1200 }}"
-              alt="{{ first_media.alt | escape }}"
-              width="{{ first_media.width }}"
-              height="{{ first_media.height }}"
-              loading="eager"
-              class="a24-media-item__image"
-            >
-          {% elsif first_media.media_type == 'video' %}
-            {{ first_media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
-          {% elsif first_media.media_type == 'external_video' %}
-            {{ first_media | external_video_tag }}
-          {% endif %}
-        </div>
-
-        {%- comment -%} PRODUCT BAR - Sticky like A24 (position: sticky) {%- endcomment -%}
-        <div class="a24-product-bar" data-a24-product-bar>
-          <div class="a24-product-bar__grid">
-            {%- comment -%} Quantity Column {%- endcomment -%}
-            <div class="a24-product-bar__col a24-product-bar__col--quantity">
-              {% render 'a24-purchase-bar', show_button: false %}
+        {%- comment -%} DESCRIPTION BLOCK {%- endcomment -%}
+        {% if product.description != blank %}
+          <div class="a24-info-block">
+            {% render 'a24-eyebrow', text: 'Description' %}
+            <div class="a24-info-block__content a24-body">
+              {{ product.description }}
             </div>
-            
-            {%- comment -%} CTA/Button Column {%- endcomment -%}
-            <div class="a24-product-bar__col a24-product-bar__col--cta">
-              <button
-                type="submit"
-                form="A24-ProductForm-{{ section.id }}"
-                name="add"
-                class="a24-product-bar__cta"
-                {% unless current_variant.available %}disabled{% endunless %}
-                data-add-to-cart-button
-              >
-                <span class="a24-product-bar__cta-text">IN CART</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {%- comment -%} REMAINING IMAGES {%- endcomment -%}
-        {% if closest.product.media.size > 1 %}
-          <div class="product-information-a24__media">
-            {% for media in closest.product.media offset: 1 %}
-              <div class="a24-media-item">
-                {% if media.media_type == 'image' %}
-                  <img
-                    src="{{ media | image_url: width: 1200 }}"
-                    alt="{{ media.alt | escape }}"
-                    width="{{ media.width }}"
-                    height="{{ media.height }}"
-                    loading="lazy"
-                    class="a24-media-item__image"
-                  >
-                {% elsif media.media_type == 'video' %}
-                  {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
-                {% elsif media.media_type == 'external_video' %}
-                  {{ media | external_video_tag }}
-                {% endif %}
-              </div>
-            {% endfor %}
           </div>
         {% endif %}
+        
+        {%- comment -%} VARIANT PICKER (if product has variants) {%- endcomment -%}
+        {% if has_variants %}
+          <div class="a24-info-block a24-info-block--variants">
+            {% render 'a24-eyebrow', text: 'Options' %}
+            <div class="a24-info-block__content">
+              {% for option in product.options_with_values %}
+                <div class="a24-variant-option">
+                  <div class="a24-variant-option__name a24-text-small">{{ option.name }}</div>
+                  <div class="a24-variant-option__values">
+                    {% for value in option.values %}
+                      <button 
+                        type="button"
+                        class="a24-variant-option__value {% if option.selected_value == value %}is-active{% endif %}"
+                        data-option-name="{{ option.name }}"
+                        data-option-value="{{ value }}"
+                      >
+                        {{ value }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        
+        {%- comment -%} MORE INFO BLOCK (from metafields or hardcoded) {%- endcomment -%}
+        {% assign more_info = product.metafields.custom.more_info %}
+        {% if more_info != blank %}
+          <div class="a24-info-block">
+            {% render 'a24-eyebrow', text: 'More Info' %}
+            <div class="a24-info-block__content a24-body">
+              {{ more_info }}
+            </div>
+          </div>
+        {% else %}
+          {%- comment -%} Default More Info content {%- endcomment -%}
+          <div class="a24-info-block">
+            {% render 'a24-eyebrow', text: 'Details' %}
+            <div class="a24-info-block__content a24-body a24-text-grey">
+              {% if product.vendor != blank %}
+                <p><strong>Vendor:</strong> {{ product.vendor }}</p>
+              {% endif %}
+              {% if product.type != blank %}
+                <p><strong>Type:</strong> {{ product.type }}</p>
+              {% endif %}
+              {% if current_variant.sku != blank %}
+                <p><strong>SKU:</strong> {{ current_variant.sku }}</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        
+      </div>
+    </div>
+    
+    {%- comment -%} RIGHT COLUMN: Media + Purchase Bar (3/4 width) {%- endcomment -%}
+    <div class="a24-product-grid__media">
+      
+      {%- comment -%} PRODUCT BAR - Sticky at top (Phase 4) {%- endcomment -%}
+      {% render 'a24-purchase-bar', product: product, section: section %}
+      
+      {%- comment -%} MEDIA GALLERY - Stacked images (Phase 5 will enhance) {%- endcomment -%}
+      {% if product_has_media %}
+        <div class="a24-media-gallery">
+          {% for media in product.media %}
+            <div class="a24-media-item" data-media-id="{{ media.id }}">
+              {% if media.media_type == 'image' %}
+                <img
+                  src="{{ media | image_url: width: 1200 }}"
+                  srcset="{{ media | image_url: width: 600 }} 600w,
+                          {{ media | image_url: width: 900 }} 900w,
+                          {{ media | image_url: width: 1200 }} 1200w,
+                          {{ media | image_url: width: 1800 }} 1800w,
+                          {{ media | image_url: width: 2400 }} 2400w"
+                  sizes="(max-width: 666px) 100vw, 75vw"
+                  alt="{{ media.alt | default: product.title | escape }}"
+                  width="{{ media.width }}"
+                  height="{{ media.height }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  class="a24-media-item__image"
+                >
+              {% elsif media.media_type == 'video' %}
+                <div class="a24-media-item__video">
+                  {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true }}
+                </div>
+              {% elsif media.media_type == 'external_video' %}
+                <div class="a24-media-item__video">
+                  {{ media | external_video_tag }}
+                </div>
+              {% elsif media.media_type == 'model' %}
+                <div class="a24-media-item__model">
+                  {{ media | model_viewer_tag }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
       {% endif %}
       
     </div>
-
+    
   </div>
-
-  {{ additional_blocks }}
+  
 </div>
+
+<script src="{{ 'a24-product.js' | asset_url }}" defer></script>
 
 {% stylesheet %}
   /* ============================================
-     A24 PDP Layout Styles - Phase 2 Refined
+     A24 PDP - PHASE 3: Product Grid Layout
      ============================================ */
   
   .product-information-a24 {
-    --a24-gap: 64px;
-    --a24-left-width: 380px;
-    --a24-right-max-width: 100%;
-    --a24-purchase-bar-height: auto;
-    --a24-header-offset: var(--header-height, 0px);
-    --a24-sticky-top: 32px;
-    
-    /* Force A24 background color */
     background-color: #f1f1f1 !important;
-    color: #000000 !important;
+    color: var(--a24-color-text, #000000);
   }
-
-  .product-information-a24__container {
-    display: grid;
-    grid-template-columns: var(--a24-left-width) 1fr;
-    gap: var(--a24-gap);
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 48px 40px;
-    align-items: stretch;
-    min-height: calc(100vh - 100px);
+  
+  /* Force grey background on all child elements */
+  .product-information-a24 *,
+  .a24-hero,
+  .a24-product-grid,
+  .a24-product-grid__info,
+  .a24-product-grid__media,
+  .a24-product-bar,
+  .a24-media-gallery {
+    background-color: transparent;
   }
-
-  /* LEFT COLUMN: Flex container to push content down */
-  .product-information-a24__left {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end; /* Push content to bottom */
-    align-items: flex-start;
-    position: relative;
+  
+  /* Ensure the section wrapper has grey background */
+  .section-product-information-a24 {
+    background-color: #f1f1f1 !important;
   }
-
-  /* Spacer pushes content down */
-  .product-information-a24__spacer {
-    flex: 1 1 auto; /* Takes up available space */
-    min-height: 100px; /* Minimum space above content */
-  }
-
-  /* Content wrapper at bottom */
-  .product-information-a24__left-content {
-    flex: 0 0 auto;
-    width: 100%;
-    position: sticky;
-    bottom: 48px;
-  }
-
-  /* Left content wrapper - flex for ordering */
-  .product-information-a24__left-content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Hide buy-buttons from left column (they go in purchase bar) */
-  .product-information-a24__left .buy-buttons {
-    display: none !important;
-  }
-
-  /* Hide default price block (we use custom A24 pricing) */
-  .product-information-a24__left .price {
-    display: none !important;
-  }
-
-  /* Hide accelerated checkout in left column */
-  .product-information-a24__left .accelerated-checkout,
-  .product-information-a24__left .shopify-payment-button {
-    display: none !important;
-  }
-
-  /* A24 Pricing Display - positioned after title */
-  .product-information-a24__pricing {
-    order: 2;
-    margin-top: 8px;
-    margin-bottom: 32px;
-  }
-
-  /* Product details block */
-  .product-information-a24__left .product-details {
-    order: 3;
-  }
-
-  /* Product details group wrapper */
-  .product-information-a24__left .product-details .group-block {
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Force specific elements to reorder within product details */
-  .product-information-a24__left .product-details h1,
-  .product-information-a24__left .product-details [class*="product-title"],
-  .product-information-a24__left .product-details [class*="heading"] {
-    order: 1;
-  }
-
-  /* RIGHT COLUMN: Media + Purchase Bar */
-  .product-information-a24__right {
-    display: flex;
-    flex-direction: column;
-    gap: 0; /* Tighter layout - gaps controlled individually */
-    max-width: var(--a24-right-max-width);
-    width: 100%;
-  }
-
-  /* First image - no margin */
-  .a24-media-item--first {
-    margin-bottom: 0;
-  }
-
-  /* Purchase Bar (at bottom of right column, NOT sticky on desktop) */
-  .product-information-a24__purchase-bar {
-    position: relative;
-    z-index: 10;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 0;
-    max-width: 500px; /* Narrower like A24 */
-    width: 100%;
-  }
-
-  .a24-purchase-bar__content {
-    /* Will be styled in Phase 3 */
-  }
-
+  
   /* ============================================
-     A24 Media Stack - Simple Vertical Scroll
-     No carousel, no lightbox, no interactions
+     QUANTITY SELECTOR - HORIZONTAL LAYOUT
      ============================================ */
   
-  .product-information-a24__media {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  .product-information-a24 .a24-quantity-selector,
+  .a24-product-bar .a24-quantity-selector,
+  .a24-product-bar .a24-selector__numbers,
+  .a24-quantity-selector {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 0 !important;
     width: 100%;
   }
-
-  /* Individual media item container */
-  .a24-media-item {
+  
+  .a24-product-bar .a24-selector {
     width: 100%;
+  }
+  
+  .product-information-a24 .a24-qty-num,
+  .a24-product-bar .a24-qty-num,
+  .a24-quantity-selector .a24-qty-num,
+  .a24-qty-num {
+    display: inline !important;
+    float: none !important;
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif) !important;
+    font-size: 1.6875rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1 !important;
+    color: #a8a8a8 !important;
+    cursor: pointer !important;
+    margin-right: 0.5em !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: color 0.2s ease !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  
+  .product-information-a24 .a24-qty-num:last-child,
+  .a24-quantity-selector .a24-qty-num:last-child,
+  .a24-qty-num:last-child {
+    margin-right: 0 !important;
+  }
+  
+  .product-information-a24 .a24-qty-num:hover,
+  .a24-quantity-selector .a24-qty-num:hover,
+  .a24-qty-num:hover {
+    color: #000000 !important;
+    background: none !important;
+  }
+  
+  .product-information-a24 .a24-qty-num.is-active,
+  .a24-quantity-selector .a24-qty-num.is-active,
+  .a24-qty-num.is-active {
+    color: #000000 !important;
+  }
+  
+  /* ============================================
+     MAIN GRID: 1/4 Info + 3/4 Media
+     ============================================ */
+  
+  .a24-product-grid {
+    display: grid;
+    grid-template-columns: calc(1 * var(--col-width, 25vw)) calc(3 * var(--col-width, 75vw));
+    gap: var(--col-gutter, 3vw);
+    padding-left: var(--col-gutter, 3vw);
+    padding-right: var(--col-gutter, 3vw);
+    min-height: 100vh;
+    background-color: #f1f1f1;
+  }
+  
+  /* ============================================
+     LEFT COLUMN: Sticky Info
+     ============================================ */
+  
+  .a24-product-grid__info {
     position: relative;
   }
-
-  /* Images - simple, non-interactive */
+  
+  .a24-product-grid__info-sticky {
+    position: sticky;
+    top: calc(var(--header-height, 0px) + 40px);
+    max-height: calc(100vh - var(--header-height, 0px) - 80px);
+    overflow-y: auto;
+    padding-bottom: 40px;
+    
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--a24-color-divider-light, #a8a8a8) transparent;
+  }
+  
+  .a24-product-grid__info-sticky::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .a24-product-grid__info-sticky::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .a24-product-grid__info-sticky::-webkit-scrollbar-thumb {
+    background: var(--a24-color-divider-light, #a8a8a8);
+    border-radius: 2px;
+  }
+  
+  /* ============================================
+     INFO BLOCKS (Description, More Info, etc.)
+     ============================================ */
+  
+  .a24-info-block {
+    margin-bottom: calc(var(--a24-space, 10px) * 4);
+  }
+  
+  .a24-info-block:last-child {
+    margin-bottom: 0;
+  }
+  
+  .a24-info-block__content {
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.19;
+  }
+  
+  .a24-info-block__content p {
+    margin: 0 0 1em 0;
+  }
+  
+  .a24-info-block__content p:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Variant Options */
+  .a24-variant-option {
+    margin-bottom: calc(var(--a24-space, 10px) * 2);
+  }
+  
+  .a24-variant-option__name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--a24-color-text-grey, #787878);
+    margin-bottom: calc(var(--a24-space, 10px) * 0.5);
+  }
+  
+  .a24-variant-option__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--a24-space, 10px) * 0.5);
+  }
+  
+  .a24-variant-option__value {
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif);
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    padding: 8px 16px;
+    background: none;
+    border: 1px solid var(--a24-color-divider-light, #a8a8a8);
+    color: var(--a24-color-text, #000000);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .a24-variant-option__value:hover {
+    border-color: var(--a24-color-text, #000000);
+  }
+  
+  .a24-variant-option__value.is-active {
+    background: var(--a24-color-text, #000000);
+    color: var(--a24-color-bg, #f1f1f1);
+    border-color: var(--a24-color-text, #000000);
+  }
+  
+  /* ============================================
+     RIGHT COLUMN: Media
+     ============================================ */
+  
+  .a24-product-grid__media {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  /* ============================================
+     PRODUCT BAR (Sticky)
+     ============================================ */
+  
+  .a24-product-bar {
+    position: sticky;
+    top: -1px;
+    z-index: 100;
+    background: var(--a24-color-bg, #f1f1f1);
+    padding: calc(var(--a24-space, 10px) * 3) 0;
+    margin-bottom: calc(var(--a24-space, 10px) * 4);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+  }
+  
+  .a24-product-bar__form {
+    width: 100%;
+  }
+  
+  .a24-product-bar__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: calc(var(--a24-space, 10px) * 4);
+  }
+  
+  .a24-product-bar__quantity {
+    flex: 1 1 auto;
+    max-width: calc(1 * var(--col-width, 25vw));
+  }
+  
+  .a24-product-bar__cta-wrap {
+    flex: 0 0 auto;
+  }
+  
+  /* Add to Cart Button */
+  .a24-product-bar__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--a24-font-family, 'Zalando Sans', sans-serif);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 28px 72px;
+    background: transparent;
+    color: var(--a24-color-text, #000000);
+    border: 1px solid var(--a24-color-text, #000000);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  
+  .a24-product-bar__cta:hover:not(:disabled) {
+    background: var(--a24-color-text, #000000);
+    color: var(--a24-color-bg, #f1f1f1);
+  }
+  
+  .a24-product-bar__cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--a24-color-text-light, #a8a8a8);
+    color: var(--a24-color-text-light, #a8a8a8);
+  }
+  
+  /* Pinned State */
+  .a24-product-bar.state-pinned {
+    background: transparent;
+    border-bottom-color: var(--a24-color-divider, #000000);
+  }
+  
+  .a24-product-bar.state-pinned .a24-product-bar__quantity {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .a24-product-bar.state-pinned .a24-product-bar__cta {
+    background: var(--a24-color-text, #000000);
+    color: var(--a24-color-bg, #f1f1f1);
+  }
+  
+  .a24-product-bar.state-pinned .a24-product-bar__cta:hover:not(:disabled) {
+    background: #333333;
+    border-color: #333333;
+  }
+  
+  /* ============================================
+     MEDIA GALLERY
+     ============================================ */
+  
+  .a24-media-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--a24-space, 10px) * 4);
+  }
+  
+  .a24-media-item {
+    width: 100%;
+  }
+  
   .a24-media-item__image {
     width: 100%;
     height: auto;
     display: block;
     object-fit: contain;
-    pointer-events: none;
-    cursor: default;
-    user-select: none;
-    -webkit-user-drag: none;
   }
-
-  /* Videos */
-  .a24-media-item video {
+  
+  .a24-media-item__video video,
+  .a24-media-item__video iframe {
     width: 100%;
     height: auto;
     display: block;
-    object-fit: contain;
   }
-
-  /* No hover effects */
-  .a24-media-item:hover {
-    transform: none;
-    box-shadow: none;
-  }
-
+  
   /* ============================================
-     A24 Product Bar - Sticky like A24.com
-     Uses position: sticky so button stays in place
+     RESPONSIVE - TABLET (667px - 1150px)
      ============================================ */
   
-  .a24-product-bar {
-    position: sticky;
-    top: -1px; /* A24 uses -1px */
-    z-index: 100;
-    background: #f1f1f1;
-    padding: 24px 0;
-    margin-bottom: 24px;
-    width: 100%;
-  }
-
-  /* Grid layout: Quantity on left, Button on right */
-  .a24-product-bar__grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 24px;
-    align-items: flex-end;
-    width: 100%;
-  }
-
-  /* Quantity column */
-  .a24-product-bar__col--quantity {
-    transition: opacity 0.3s ease;
-  }
-
-  /* CTA/Button column - right aligned */
-  .a24-product-bar__col--cta {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-  }
-
-  /* The Add to Cart button (A24 style) */
-  .a24-product-bar__cta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 28px 72px;
-    font-family: inherit;
-    font-size: 0.8125rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #000000;
-    background-color: transparent;
-    border: 1px solid #000000;
-    border-radius: 0;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    min-width: 200px;
-  }
-
-  .a24-product-bar__cta:hover:not(:disabled) {
-    background-color: #000000;
-    color: #ffffff;
-  }
-
-  .a24-product-bar__cta:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    border-color: #a8a8a8;
-    color: #a8a8a8;
-  }
-
-  /* ============================================
-     PINNED STATE - When bar is stuck at top
-     ============================================ */
-  
-  .a24-product-bar.state-pinned {
-    background: transparent;
-  }
-
-  /* Hide quantity when pinned (opacity, not display) */
-  .a24-product-bar.state-pinned .a24-product-bar__col--quantity {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Button turns BLACK when pinned */
-  .a24-product-bar.state-pinned .a24-product-bar__cta {
-    background-color: #000000;
-    color: #ffffff;
-    border-color: #000000;
-  }
-
-  .a24-product-bar.state-pinned .a24-product-bar__cta:hover:not(:disabled) {
-    background-color: #333333;
-    border-color: #333333;
-  }
-
-  /* Gap before remaining images */
-  .product-information-a24__media {
-    margin-top: 0;
-  }
-
-  /* MOBILE: Single column, purchase bar at bottom */
-  @media screen and (max-width: 749px) {
-    .product-information-a24 {
-      --a24-sticky-top: 16px;
+  @media screen and (min-width: 667px) and (max-width: 1150px) {
+    .a24-product-grid {
+      grid-template-columns: calc(1.5 * var(--col-width, 25vw)) calc(2.5 * var(--col-width, 75vw));
     }
-
-    .product-information-a24__container {
-      grid-template-columns: 1fr;
-      gap: 24px;
-      padding: 24px var(--padding-md, 16px) 160px;
-      min-height: auto;
-      align-items: flex-start;
+    
+    .a24-product-bar__cta {
+      padding: 24px 48px;
     }
-
-    .product-information-a24__left {
-      position: static;
-      order: 1;
-      justify-content: flex-start;
-    }
-
-    .product-information-a24__spacer {
+    
+    /* Hide quantity on tablet when pinned */
+    .a24-product-bar.state-pinned .a24-product-bar__quantity {
       display: none;
     }
-
-    .product-information-a24__left-content {
+  }
+  
+  /* ============================================
+     RESPONSIVE - MOBILE (max-width: 666px)
+     ============================================ */
+  
+  @media screen and (max-width: 666px) {
+    .a24-product-grid {
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--a24-space, 10px) * 3);
+      padding: 0 16px calc(var(--a24-space, 10px) * 16);
+    }
+    
+    /* Info column - not sticky on mobile */
+    .a24-product-grid__info {
+      order: 2;
+    }
+    
+    .a24-product-grid__info-sticky {
       position: static;
+      max-height: none;
+      overflow: visible;
     }
-
-    .product-information-a24__left .buy-buttons {
-      display: none !important;
+    
+    /* Media column first on mobile */
+    .a24-product-grid__media {
+      order: 1;
     }
-
-    .product-information-a24__right {
-      order: 0;
-      max-width: 100%;
-    }
-
-    /* Product bar - fixed at bottom on mobile */
+    
+    /* Product bar - fixed at bottom */
     .a24-product-bar {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       top: auto;
-      z-index: 100;
-      background: #f1f1f1;
-      border-top: 1px solid #a8a8a8;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      background: var(--a24-color-bg, #f1f1f1);
+      border-top: 1px solid var(--a24-color-divider-light, #a8a8a8);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
       padding: 16px;
       margin: 0;
     }
-
-    .a24-product-bar__grid {
-      grid-template-columns: 1fr;
+    
+    .a24-product-bar__inner {
+      flex-direction: column;
       gap: 16px;
+      align-items: stretch;
     }
-
-    .a24-product-bar__col--cta {
-      justify-content: stretch;
+    
+    .a24-product-bar__quantity {
+      max-width: 100%;
     }
-
+    
     .a24-product-bar__cta {
       width: 100%;
       padding: 20px 24px;
     }
-
-    /* On mobile, never use pinned behavior */
+    
+    /* No pinned state on mobile */
     .a24-product-bar.state-pinned {
-      background: #f1f1f1;
+      background: var(--a24-color-bg, #f1f1f1);
+      border-bottom: none;
     }
-
-    .a24-product-bar.state-pinned .a24-product-bar__col--quantity {
+    
+    .a24-product-bar.state-pinned .a24-product-bar__quantity {
       opacity: 1;
       pointer-events: auto;
     }
-
+    
     .a24-product-bar.state-pinned .a24-product-bar__cta {
-      background-color: transparent;
-      color: #000000;
-      border-color: #000000;
+      background: transparent;
+      color: var(--a24-color-text, #000000);
     }
-
-    .product-information-a24__media {
-      order: 1;
-      gap: 12px;
-    }
-  }
-
-  /* TABLET: Adjust left column width */
-  @media screen and (min-width: 750px) and (max-width: 1023px) {
-    .product-information-a24 {
-      --a24-left-width: 320px;
-      --a24-gap: 48px;
-    }
-
-    .product-information-a24__container {
-      padding: 32px 24px;
-    }
-
-    .a24-product-bar__cta {
-      padding: 24px 48px;
-      min-width: 180px;
+    
+    /* Media gallery smaller gap on mobile */
+    .a24-media-gallery {
+      gap: calc(var(--a24-space, 10px) * 2);
     }
   }
-
-  /* Hide the separate sticky button from purchase bar - we use position:sticky now */
-  .a24-sticky-button {
-    display: none !important;
-  }
-
-  /* LARGE DESKTOP: Maintain full-width feel */
+  
+  /* ============================================
+     LARGE DESKTOP (1400px+)
+     ============================================ */
+  
   @media screen and (min-width: 1400px) {
-    .product-information-a24 {
-      --a24-left-width: 420px;
-      --a24-gap: 80px;
+    .a24-product-grid {
+      padding-left: calc(var(--col-gutter, 3vw) * 1.5);
+      padding-right: calc(var(--col-gutter, 3vw) * 1.5);
     }
-
-    .product-information-a24__container {
-      padding: 64px 60px;
+    
+    .a24-product-bar__cta {
+      padding: 32px 96px;
     }
   }
-
-  /* If header is sticky, adjust offset */
-  body:has(#header-group #header-component[data-sticky-state='active']) .product-information-a24 {
-    --a24-header-offset: var(--header-height);
+  
+  /* ============================================
+     FORCE GREY BACKGROUND ON ENTIRE PAGE
+     ============================================ */
+  
+  /* Target the main content area */
+  body:has(.product-information-a24) {
+    background-color: #f1f1f1 !important;
   }
-
-  /* Minimal typography overrides for A24 aesthetic */
-  .product-information-a24__left h1 {
-    font-weight: 400;
-    letter-spacing: -0.02em;
+  
+  body:has(.product-information-a24) .content-for-layout,
+  body:has(.product-information-a24) #MainContent {
+    background-color: #f1f1f1 !important;
   }
-
-  .product-information-a24__left .price {
-    font-weight: 500;
-  }
-
-  /* Smooth scroll behavior */
-  .product-information-a24__left {
-    scroll-behavior: smooth;
-  }
-
+  
 {% endstylesheet %}
-
-<script>
-  // A24 Product Bar - Detect when sticky bar becomes pinned
-  (function() {
-    const productBar = document.querySelector('[data-a24-product-bar]');
-    if (!productBar) return;
-
-    // Use IntersectionObserver to detect when bar is pinned
-    // When the bar's top edge goes past the viewport top, it's pinned
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          // When not intersecting and the bar is above viewport = pinned
-          if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
-            productBar.classList.add('state-pinned');
-          } else {
-            productBar.classList.remove('state-pinned');
-          }
-        });
-      },
-      {
-        threshold: [1], // Trigger when fully visible/hidden
-        rootMargin: '1px 0px 0px 0px' // Match the -1px top
-      }
-    );
-
-    observer.observe(productBar);
-
-    // Also use scroll for more precise control (backup)
-    let ticking = false;
-    window.addEventListener('scroll', function() {
-      if (!ticking) {
-        window.requestAnimationFrame(function() {
-          const rect = productBar.getBoundingClientRect();
-          // If the bar's top is at or above 0 (stuck), add pinned class
-          if (rect.top <= 0) {
-            productBar.classList.add('state-pinned');
-          } else {
-            productBar.classList.remove('state-pinned');
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
-  })();
-</script>
 
 {% schema %}
 {
@@ -637,51 +666,6 @@
         }
       ],
       "default": "content-full-width"
-    },
-    {
-      "type": "select",
-      "id": "desktop_media_position",
-      "label": "t:settings.media_position",
-      "options": [
-        {
-          "value": "left",
-          "label": "t:options.left"
-        },
-        {
-          "value": "right",
-          "label": "t:options.right"
-        }
-      ],
-      "default": "right",
-      "info": "A24 layout always shows media on right"
-    },
-    {
-      "type": "checkbox",
-      "id": "equal_columns",
-      "label": "t:settings.equal_columns",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "limit_details_width",
-      "label": "t:settings.limit_product_details_width",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "gap",
-      "label": "t:settings.gap",
-      "min": 0,
-      "max": 96,
-      "step": 4,
-      "unit": "px",
-      "default": 48
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:settings.color_scheme",
-      "default": "scheme-1"
     },
     {
       "type": "header",

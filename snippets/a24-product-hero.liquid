@@ -24,6 +24,26 @@
   if current_variant.available and current_variant.inventory_quantity > 0 and current_variant.inventory_quantity <= 10
     assign eyebrow_text = 'Back in Stock'
   endif
+  
+  # Check for selling plans (subscriptions) for member pricing
+  assign has_selling_plans = false
+  assign member_price = nil
+  assign savings_percent = 0
+  if product.selling_plan_groups.size > 0
+    assign has_selling_plans = true
+    for selling_plan_group in product.selling_plan_groups
+      for selling_plan in selling_plan_group.selling_plans
+        assign adjustment = selling_plan.price_adjustments.first
+        if adjustment.value != 0
+          assign savings_percent = adjustment.value | abs
+          # Calculate discounted price: price * (100 - discount%) / 100
+          assign discount_multiplier = 100 | minus: savings_percent
+          assign member_price = current_variant.price | times: discount_multiplier | divided_by: 100
+          break
+        endif
+      endfor
+    endfor
+  endif
 %}
 
 <section class="a24-hero" data-a24-hero>
@@ -52,6 +72,18 @@
           {% if current_variant.compare_at_price > current_variant.price %}
             <div class="a24-hero__compare-price a24-text-light">
               <s>{{ current_variant.compare_at_price | money }}</s>
+            </div>
+          {% endif %}
+          
+          {% if has_selling_plans and savings_percent > 0 %}
+            <div class="a24-hero__member-pricing">
+              <span class="a24-hero__member-price a24-text-grey">
+                {{ member_price | money }}
+              </span>
+              <span class="a24-hero__member-text a24-text-small a24-text-grey">
+                Members save {{ savings_percent }}% 
+                <a href="/pages/membership" class="a24-hero__member-link">Join us →</a>
+              </span>
             </div>
           {% endif %}
         </div>
@@ -105,7 +137,7 @@
   
   .a24-hero {
     min-height: max(calc(100vh - var(--product-bar-outer-height, 120px)), 37.5rem);
-    background-color: var(--a24-color-bg, #f1f1f1);
+    background-color: #f1f1f1 !important;
     padding-bottom: calc(var(--a24-space, 10px) * 4);
   }
   
@@ -175,6 +207,39 @@
   .a24-hero__compare-price {
     font-size: 1.25rem;
     color: var(--a24-color-text-light, #a8a8a8);
+  }
+  
+  /* Member Pricing */
+  .a24-hero__member-pricing {
+    display: flex;
+    align-items: baseline;
+    gap: calc(var(--a24-space, 10px) * 1.5);
+    margin-left: calc(var(--a24-space, 10px) * 2);
+  }
+  
+  .a24-hero__member-price {
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: -0.05em;
+  }
+  
+  .a24-hero__member-text {
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  
+  .a24-hero__member-link {
+    color: var(--a24-color-text-grey, #787878);
+    text-decoration: none;
+    border-bottom: 1px solid var(--a24-color-text-grey, #787878);
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  
+  .a24-hero__member-link:hover {
+    color: var(--a24-color-text, #000000);
+    border-color: var(--a24-color-text, #000000);
   }
   
   /* Mobile Description */
