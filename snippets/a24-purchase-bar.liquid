@@ -68,19 +68,19 @@
         value="{{ variant.id }}"
       >
       
+      {%- comment -%} Hidden selling plan input (if available) {%- endcomment -%}
+      {% if has_selling_plans and monthly_plan %}
+        <input
+          type="hidden"
+          name="selling_plan"
+          value="{{ monthly_plan.id }}"
+          data-selling-plan-input
+        >
+      {% endif %}
+      
       <div class="a24-purchase-bar__content">
         
-        {%- comment -%} Hidden selling plan input (if available) {%- endcomment -%}
-        {% if has_selling_plans and monthly_plan %}
-          <input
-            type="hidden"
-            name="selling_plan"
-            value="{{ monthly_plan.id }}"
-            data-selling-plan-input
-          >
-        {% endif %}
-        
-        {%- comment -%} QUANTITY SELECTOR (A24 style - plain numbers with underlines) {%- endcomment -%}
+        {%- comment -%} QUANTITY SELECTOR (A24 style - plain numbers) {%- endcomment -%}
         <div class="a24-quantity-selector" data-a24-quantity>
           <div class="a24-quantity__header">
             <span class="a24-quantity__label" id="a24-quantity-label-{{ section.id }}">
@@ -117,20 +117,33 @@
           >
         </div>
         
-        {%- comment -%} ADD TO CART BUTTON {%- endcomment -%}
-        <button
-          type="submit"
-          name="add"
-          class="a24-add-to-cart button"
-          {% unless can_add_to_cart %}disabled{% endunless %}
-          data-add-to-cart-button
-        >
-          <span class="a24-add-to-cart__text">{{ add_to_cart_text }}</span>
-        </button>
+        {%- comment -%} ADD TO CART BUTTON - Separate wrapper for sticky behavior {%- endcomment -%}
+        <div class="a24-button-wrapper" data-a24-button-wrapper>
+          <button
+            type="submit"
+            name="add"
+            class="a24-add-to-cart"
+            {% unless can_add_to_cart %}disabled{% endunless %}
+            data-add-to-cart-button
+          >
+            <span class="a24-add-to-cart__text">IN CART</span>
+          </button>
+        </div>
         
       </div>
     {%- endform -%}
   </product-form-component>
+</div>
+
+{%- comment -%} Clone of button for sticky header (hidden by default) {%- endcomment -%}
+<div class="a24-sticky-button" data-a24-sticky-button aria-hidden="true">
+  <button
+    type="button"
+    class="a24-add-to-cart a24-add-to-cart--sticky"
+    data-sticky-add-to-cart
+  >
+    <span class="a24-add-to-cart__text">IN CART</span>
+  </button>
 </div>
 
 {% stylesheet %}
@@ -244,10 +257,14 @@
      Add to Cart Button (A24 Style - LARGE Outlined)
      ============================================ */
   
+  .a24-button-wrapper {
+    flex-shrink: 0;
+  }
+
   .a24-add-to-cart {
-    padding: 24px 56px !important; /* Larger padding */
+    padding: 24px 56px !important;
     font-family: inherit !important;
-    font-size: 0.8125rem !important; /* 13px */
+    font-size: 0.8125rem !important;
     font-weight: 400 !important;
     letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
@@ -279,6 +296,52 @@
   }
 
   /* ============================================
+     STICKY Add to Cart Button (BLACK when sticky)
+     ============================================ */
+  
+  .a24-sticky-button {
+    position: fixed !important;
+    top: 24px !important;
+    right: 40px !important;
+    z-index: 999 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(-20px) !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease !important;
+    pointer-events: none !important;
+  }
+
+  .a24-sticky-button.is-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  /* Sticky button is BLACK filled */
+  .a24-add-to-cart--sticky {
+    padding: 24px 56px !important;
+    font-family: inherit !important;
+    font-size: 0.8125rem !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: #ffffff !important;
+    background-color: #000000 !important;
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    min-width: 180px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .a24-add-to-cart--sticky:hover {
+    background-color: #333333 !important;
+    border-color: #333333 !important;
+  }
+
+  /* ============================================
      Mobile Adjustments
      ============================================ */
   
@@ -295,116 +358,184 @@
     }
 
     .a24-quantity__number {
-      font-size: 1.25rem !important; /* 20px on mobile */
+      font-size: 1.25rem !important;
     }
 
     .a24-add-to-cart {
       width: 100% !important;
       padding: 20px 24px !important;
     }
+
+    /* Hide sticky button on mobile - use fixed bottom bar instead */
+    .a24-sticky-button {
+      display: none !important;
+    }
+  }
+
+  /* Tablet adjustments */
+  @media screen and (min-width: 750px) and (max-width: 1023px) {
+    .a24-sticky-button {
+      right: 24px !important;
+      top: 20px !important;
+    }
+
+    .a24-add-to-cart--sticky {
+      padding: 20px 40px !important;
+      min-width: 160px !important;
+    }
   }
 
 {% endstylesheet %}
 
 <script>
-  // A24 Purchase Bar JavaScript with Full Accessibility
+  // A24 Purchase Bar JavaScript with Full Accessibility & Sticky Button
   (function() {
     const purchaseBar = document.querySelector('[data-a24-purchase-bar]');
     if (!purchaseBar) return;
 
-    // Quantity selector
+    // Elements
     const quantityNumbers = purchaseBar.querySelectorAll('[data-quantity-button]');
     const quantityInput = purchaseBar.querySelector('[data-quantity-input]');
     const quantityNumbersContainer = purchaseBar.querySelector('[data-quantity-buttons]');
+    const originalButton = purchaseBar.querySelector('[data-add-to-cart-button]');
+    const buttonWrapper = purchaseBar.querySelector('[data-a24-button-wrapper]');
+    const stickyButton = document.querySelector('[data-a24-sticky-button]');
+    const stickyButtonElement = stickyButton?.querySelector('[data-sticky-add-to-cart]');
+    const productForm = purchaseBar.querySelector('form');
 
-    if (!quantityNumbers.length || !quantityInput) return;
+    // ============================================
+    // QUANTITY SELECTOR
+    // ============================================
+    
+    if (quantityNumbers.length && quantityInput) {
+      const numbersArray = Array.from(quantityNumbers);
 
-    // Convert NodeList to Array for easier manipulation
-    const numbersArray = Array.from(quantityNumbers);
-
-    /**
-     * Update quantity selection
-     * @param {HTMLElement} number - The number button to activate
-     */
-    function selectQuantity(number) {
-      const quantity = number.dataset.quantity;
-      
-      // Update active state and ARIA attributes
-      numbersArray.forEach(num => {
-        const isSelected = num === number;
-        num.classList.toggle('active', isSelected);
-        num.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        num.setAttribute('tabindex', isSelected ? '0' : '-1');
-      });
-      
-      // Update hidden input
-      quantityInput.value = quantity;
-      
-      // Focus the selected number
-      number.focus();
-    }
-
-    /**
-     * Get the index of the currently selected number
-     * @returns {number} Index of active number
-     */
-    function getCurrentIndex() {
-      return numbersArray.findIndex(num => num.classList.contains('active'));
-    }
-
-    // Click handler
-    quantityNumbers.forEach(number => {
-      number.addEventListener('click', function(e) {
-        e.preventDefault();
-        selectQuantity(this);
-      });
-    });
-
-    // Keyboard navigation (roving tabindex)
-    quantityNumbersContainer.addEventListener('keydown', function(e) {
-      const currentIndex = getCurrentIndex();
-      let newIndex = currentIndex;
-
-      switch(e.key) {
-        case 'ArrowRight':
-        case 'ArrowDown':
-          e.preventDefault();
-          newIndex = (currentIndex + 1) % numbersArray.length;
-          selectQuantity(numbersArray[newIndex]);
-          break;
-
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          e.preventDefault();
-          newIndex = (currentIndex - 1 + numbersArray.length) % numbersArray.length;
-          selectQuantity(numbersArray[newIndex]);
-          break;
-
-        case 'Home':
-          e.preventDefault();
-          selectQuantity(numbersArray[0]);
-          break;
-
-        case 'End':
-          e.preventDefault();
-          selectQuantity(numbersArray[numbersArray.length - 1]);
-          break;
-
-        case ' ':
-        case 'Enter':
-          e.preventDefault();
-          // Re-select current number (in case user wants to confirm)
-          selectQuantity(numbersArray[currentIndex]);
-          break;
+      function selectQuantity(number) {
+        const quantity = number.dataset.quantity;
+        numbersArray.forEach(num => {
+          const isSelected = num === number;
+          num.classList.toggle('active', isSelected);
+          num.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+          num.setAttribute('tabindex', isSelected ? '0' : '-1');
+        });
+        quantityInput.value = quantity;
+        number.focus();
       }
-    });
 
-    // Ensure only one number is tabbable on page load
-    const activeNumber = numbersArray.find(num => num.classList.contains('active'));
-    if (activeNumber) {
-      numbersArray.forEach(num => {
-        num.setAttribute('tabindex', num === activeNumber ? '0' : '-1');
+      function getCurrentIndex() {
+        return numbersArray.findIndex(num => num.classList.contains('active'));
+      }
+
+      // Click handler
+      quantityNumbers.forEach(number => {
+        number.addEventListener('click', function(e) {
+          e.preventDefault();
+          selectQuantity(this);
+        });
       });
+
+      // Keyboard navigation
+      if (quantityNumbersContainer) {
+        quantityNumbersContainer.addEventListener('keydown', function(e) {
+          const currentIndex = getCurrentIndex();
+          let newIndex = currentIndex;
+
+          switch(e.key) {
+            case 'ArrowRight':
+            case 'ArrowDown':
+              e.preventDefault();
+              newIndex = (currentIndex + 1) % numbersArray.length;
+              selectQuantity(numbersArray[newIndex]);
+              break;
+            case 'ArrowLeft':
+            case 'ArrowUp':
+              e.preventDefault();
+              newIndex = (currentIndex - 1 + numbersArray.length) % numbersArray.length;
+              selectQuantity(numbersArray[newIndex]);
+              break;
+            case 'Home':
+              e.preventDefault();
+              selectQuantity(numbersArray[0]);
+              break;
+            case 'End':
+              e.preventDefault();
+              selectQuantity(numbersArray[numbersArray.length - 1]);
+              break;
+            case ' ':
+            case 'Enter':
+              e.preventDefault();
+              selectQuantity(numbersArray[currentIndex]);
+              break;
+          }
+        });
+      }
+
+      // Initialize tabindex
+      const activeNumber = numbersArray.find(num => num.classList.contains('active'));
+      if (activeNumber) {
+        numbersArray.forEach(num => {
+          num.setAttribute('tabindex', num === activeNumber ? '0' : '-1');
+        });
+      }
+    }
+
+    // ============================================
+    // STICKY BUTTON BEHAVIOR
+    // ============================================
+    
+    if (buttonWrapper && stickyButton && stickyButtonElement && productForm) {
+      
+      // Make sticky button submit the form
+      stickyButtonElement.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Trigger the original button click to submit the form
+        if (originalButton && !originalButton.disabled) {
+          originalButton.click();
+        }
+      });
+
+      // Intersection Observer to detect when button goes above viewport
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px 0px 0px',
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          // When the button wrapper is NOT intersecting (scrolled past top)
+          // AND it's above the viewport (boundingClientRect.top < 0)
+          const rect = entry.boundingClientRect;
+          
+          if (!entry.isIntersecting && rect.top < 0) {
+            // Button has scrolled past the top - show sticky button
+            stickyButton.classList.add('is-visible');
+          } else {
+            // Button is visible - hide sticky button
+            stickyButton.classList.remove('is-visible');
+          }
+        });
+      }, observerOptions);
+
+      // Observe the button wrapper
+      observer.observe(buttonWrapper);
+
+      // Also handle scroll for more precise control
+      let ticking = false;
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(function() {
+            const rect = buttonWrapper.getBoundingClientRect();
+            if (rect.top < 0) {
+              stickyButton.classList.add('is-visible');
+            } else {
+              stickyButton.classList.remove('is-visible');
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
     }
   })();
 </script>

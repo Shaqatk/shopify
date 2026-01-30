@@ -207,11 +207,11 @@
     /* Will be styled in Phase 3 */
   }
 
-  /* Media Stack (scrolls) - NO CAROUSEL */
+  /* Media Stack (scrolls) - NO CAROUSEL, NO LIGHTBOX */
   .product-information-a24__media {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
   }
 
   /* Force vertical stacking - override ALL Ritual carousel/grid styles */
@@ -229,7 +229,8 @@
   .product-information-a24__media .media-gallery__controls,
   .product-information-a24__media .slideshow-controls,
   .product-information-a24__media .slideshow-arrows,
-  .product-information-a24__media .media-gallery__thumbnails {
+  .product-information-a24__media .media-gallery__thumbnails,
+  .product-information-a24__media .media-gallery__pagination {
     display: none !important;
   }
 
@@ -242,21 +243,59 @@
     transform: none !important;
     opacity: 1 !important;
     visibility: visible !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* DISABLE IMAGE CLICKING - No lightbox, no zoom, no modal */
+  .product-information-a24__media a,
+  .product-information-a24__media button,
+  .product-information-a24__media [data-media-zoom],
+  .product-information-a24__media [data-lightbox],
+  .product-information-a24__media .media-gallery__item a,
+  .product-information-a24__media .product-media a {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+
+  /* Remove any zoom/lightbox icons */
+  .product-information-a24__media .media-gallery__zoom,
+  .product-information-a24__media .zoom-icon,
+  .product-information-a24__media [class*="zoom"],
+  .product-information-a24__media [class*="lightbox"],
+  .product-information-a24__media .media-gallery__icon {
+    display: none !important;
   }
 
   /* Ensure images fill width and maintain aspect ratio */
   .product-information-a24__media img,
   .product-information-a24__media video {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: contain;
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    object-fit: contain !important;
+    pointer-events: none !important;
+    cursor: default !important;
   }
 
   /* Remove any slideshow/carousel JavaScript behavior */
   .product-information-a24__media .media-gallery__item[hidden],
   .product-information-a24__media .slideshow-slide[hidden] {
     display: block !important;
+  }
+
+  /* Remove hover effects that suggest clickability */
+  .product-information-a24__media .media-gallery__item:hover,
+  .product-information-a24__media .product-media:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Disable any image wrapper interactions */
+  .product-information-a24__media .product-media,
+  .product-information-a24__media .media-gallery__media,
+  .product-information-a24__media .media-wrapper {
+    pointer-events: none !important;
+    cursor: default !important;
   }
 
   /* MOBILE: Single column, purchase bar at bottom */
@@ -361,6 +400,60 @@
   }
 
 {% endstylesheet %}
+
+<script>
+  // A24 Section - Disable image clicks and carousel behavior
+  document.addEventListener('DOMContentLoaded', function() {
+    const mediaContainer = document.querySelector('.product-information-a24__media');
+    if (!mediaContainer) return;
+
+    // Prevent all click events on media
+    mediaContainer.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }, true);
+
+    // Remove any existing event listeners by cloning (nuclear option)
+    const images = mediaContainer.querySelectorAll('img, video, a, button');
+    images.forEach(el => {
+      el.style.pointerEvents = 'none';
+      el.style.cursor = 'default';
+      el.removeAttribute('href');
+      el.removeAttribute('onclick');
+      el.removeAttribute('data-media-zoom');
+      el.removeAttribute('data-lightbox');
+    });
+
+    // Disable any slideshow/carousel components
+    const slideshows = mediaContainer.querySelectorAll('slideshow-component, media-gallery, [data-slideshow], [data-gallery]');
+    slideshows.forEach(slideshow => {
+      // Force all slides to be visible
+      const slides = slideshow.querySelectorAll('[hidden], .hidden');
+      slides.forEach(slide => {
+        slide.hidden = false;
+        slide.classList.remove('hidden');
+        slide.style.display = 'block';
+        slide.style.visibility = 'visible';
+        slide.style.opacity = '1';
+      });
+    });
+
+    // MutationObserver to catch any dynamically added elements
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === 1) {
+            node.style.pointerEvents = 'none';
+            if (node.tagName === 'A') node.removeAttribute('href');
+          }
+        });
+      });
+    });
+
+    observer.observe(mediaContainer, { childList: true, subtree: true });
+  });
+</script>
 
 {% schema %}
 {
