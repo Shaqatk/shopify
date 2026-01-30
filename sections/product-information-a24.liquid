@@ -57,37 +57,61 @@
       </div>
     </div>
 
-    {%- comment -%} RIGHT COLUMN: Media Stack (top) + Purchase Bar (bottom) {%- endcomment -%}
+    {%- comment -%} RIGHT COLUMN: First Image → Cart Controls → Remaining Images {%- endcomment -%}
     <div class="product-information-a24__right">
       
-      {%- comment -%} Media Stack (scrolls) - Simple vertical images, no carousel {%- endcomment -%}
       {% if product_has_media %}
-        <div class="product-information-a24__media">
-          {% for media in closest.product.media %}
-            <div class="a24-media-item">
-              {% if media.media_type == 'image' %}
-                <img
-                  src="{{ media | image_url: width: 1200 }}"
-                  alt="{{ media.alt | escape }}"
-                  width="{{ media.width }}"
-                  height="{{ media.height }}"
-                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                  class="a24-media-item__image"
-                >
-              {% elsif media.media_type == 'video' %}
-                {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
-              {% elsif media.media_type == 'external_video' %}
-                {{ media | external_video_tag }}
-              {% endif %}
-            </div>
-          {% endfor %}
+        {%- comment -%} FIRST IMAGE {%- endcomment -%}
+        {% assign first_media = closest.product.media | first %}
+        <div class="a24-media-item a24-media-item--first">
+          {% if first_media.media_type == 'image' %}
+            <img
+              src="{{ first_media | image_url: width: 1200 }}"
+              alt="{{ first_media.alt | escape }}"
+              width="{{ first_media.width }}"
+              height="{{ first_media.height }}"
+              loading="eager"
+              class="a24-media-item__image"
+            >
+          {% elsif first_media.media_type == 'video' %}
+            {{ first_media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+          {% elsif first_media.media_type == 'external_video' %}
+            {{ first_media | external_video_tag }}
+          {% endif %}
         </div>
-      {% endif %}
 
-      {%- comment -%} Purchase Bar at BOTTOM (A24 style) {%- endcomment -%}
-      <div class="product-information-a24__purchase-bar">
-        {% render 'a24-purchase-bar' %}
-      </div>
+        {%- comment -%} CART CONTROLS (Quantity + Button) - After first image {%- endcomment -%}
+        <div class="a24-cart-controls" data-a24-cart-controls>
+          <div class="a24-cart-controls__inner" data-a24-cart-inner>
+            {% render 'a24-purchase-bar' %}
+          </div>
+          <div class="a24-cart-controls__placeholder" aria-hidden="true"></div>
+        </div>
+
+        {%- comment -%} REMAINING IMAGES {%- endcomment -%}
+        {% if closest.product.media.size > 1 %}
+          <div class="product-information-a24__media">
+            {% for media in closest.product.media offset: 1 %}
+              <div class="a24-media-item">
+                {% if media.media_type == 'image' %}
+                  <img
+                    src="{{ media | image_url: width: 1200 }}"
+                    alt="{{ media.alt | escape }}"
+                    width="{{ media.width }}"
+                    height="{{ media.height }}"
+                    loading="lazy"
+                    class="a24-media-item__image"
+                  >
+                {% elsif media.media_type == 'video' %}
+                  {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+                {% elsif media.media_type == 'external_video' %}
+                  {{ media | external_video_tag }}
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endif %}
       
     </div>
 
@@ -199,9 +223,14 @@
   .product-information-a24__right {
     display: flex;
     flex-direction: column;
-    gap: 48px;
+    gap: 0; /* Tighter layout - gaps controlled individually */
     max-width: var(--a24-right-max-width);
     width: 100%;
+  }
+
+  /* First image - no margin */
+  .a24-media-item--first {
+    margin-bottom: 0;
   }
 
   /* Purchase Bar (at bottom of right column, NOT sticky on desktop) */
@@ -264,6 +293,70 @@
     box-shadow: none;
   }
 
+  /* ============================================
+     A24 Cart Controls - Between First Image & Rest
+     Sticky behavior with state transitions
+     ============================================ */
+  
+  .a24-cart-controls {
+    position: relative;
+    width: 100%;
+    margin: 32px 0 24px 0;
+  }
+
+  /* Gap before remaining images */
+  .product-information-a24__media {
+    margin-top: 8px;
+  }
+
+  .a24-cart-controls__inner {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  /* When sticky - fixed at top */
+  .a24-cart-controls.is-sticky .a24-cart-controls__inner {
+    position: fixed;
+    top: 24px;
+    right: 40px;
+    left: auto;
+    width: auto;
+    z-index: 999;
+  }
+
+  /* Hide quantity when sticky */
+  .a24-cart-controls.is-sticky .a24-quantity-selector {
+    display: none !important;
+  }
+
+  /* Transform button to black when sticky */
+  .a24-cart-controls.is-sticky .a24-add-to-cart {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #000000 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .a24-cart-controls.is-sticky .a24-add-to-cart:hover:not(:disabled) {
+    background-color: #333333 !important;
+    border-color: #333333 !important;
+  }
+
+  /* Hide the purchase bar content layout wrapper when sticky */
+  .a24-cart-controls.is-sticky .a24-purchase-bar__content {
+    gap: 0 !important;
+  }
+
+  /* Placeholder to maintain layout when sticky */
+  .a24-cart-controls__placeholder {
+    display: none;
+    height: 100px; /* Approximate height of cart controls */
+  }
+
+  .a24-cart-controls.is-sticky .a24-cart-controls__placeholder {
+    display: block;
+  }
+
   /* MOBILE: Single column, purchase bar at bottom */
   @media screen and (max-width: 749px) {
     .product-information-a24 {
@@ -301,7 +394,8 @@
       max-width: 100%;
     }
 
-    .product-information-a24__purchase-bar {
+    /* Cart controls - fixed at bottom on mobile */
+    .a24-cart-controls {
       position: fixed;
       bottom: 0;
       left: 0;
@@ -312,7 +406,28 @@
       border-top: 1px solid #a8a8a8;
       box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
       padding: 16px;
-      max-width: none;
+      margin: 0;
+    }
+
+    /* On mobile, never use sticky top behavior */
+    .a24-cart-controls.is-sticky .a24-cart-controls__inner {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: 100%;
+    }
+
+    /* Show quantity on mobile even when "sticky" */
+    .a24-cart-controls.is-sticky .a24-quantity-selector {
+      display: flex !important;
+    }
+
+    /* Keep button outlined on mobile */
+    .a24-cart-controls.is-sticky .a24-add-to-cart {
+      background-color: transparent !important;
+      color: #000000 !important;
+      border-color: #000000 !important;
+      box-shadow: none !important;
     }
 
     .product-information-a24__media {
@@ -331,6 +446,17 @@
     .product-information-a24__container {
       padding: 32px 24px;
     }
+
+    /* Tablet sticky position */
+    .a24-cart-controls.is-sticky .a24-cart-controls__inner {
+      right: 24px;
+      top: 20px;
+    }
+  }
+
+  /* Hide the separate sticky button from purchase bar - we handle it here */
+  .a24-sticky-button {
+    display: none !important;
   }
 
   /* LARGE DESKTOP: Maintain full-width feel */
@@ -368,8 +494,83 @@
 {% endstylesheet %}
 
 <script>
-  // A24 Section - Simple vertical media stack (no interactions needed)
-  // Images are already non-interactive via CSS pointer-events: none
+  // A24 Section - Sticky Cart Controls Behavior
+  (function() {
+    const cartControls = document.querySelector('[data-a24-cart-controls]');
+    if (!cartControls) return;
+
+    const cartInner = cartControls.querySelector('[data-a24-cart-inner]');
+    if (!cartInner) return;
+
+    // Get the initial position of cart controls
+    let initialTop = 0;
+    let controlsHeight = 0;
+    let isSticky = false;
+
+    function updateMeasurements() {
+      // Only measure when not sticky
+      if (!isSticky) {
+        const rect = cartControls.getBoundingClientRect();
+        initialTop = rect.top + window.scrollY;
+        controlsHeight = cartControls.offsetHeight;
+      }
+    }
+
+    function handleScroll() {
+      const scrollY = window.scrollY;
+      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height') || '0', 10);
+      const triggerPoint = initialTop - headerHeight - 24; // 24px offset from top
+
+      if (scrollY > triggerPoint) {
+        if (!isSticky) {
+          isSticky = true;
+          cartControls.classList.add('is-sticky');
+          // Set placeholder height to prevent layout jump
+          cartControls.style.minHeight = controlsHeight + 'px';
+        }
+      } else {
+        if (isSticky) {
+          isSticky = false;
+          cartControls.classList.remove('is-sticky');
+          cartControls.style.minHeight = '';
+        }
+      }
+    }
+
+    // Initial measurements
+    updateMeasurements();
+
+    // Throttled scroll handler
+    let ticking = false;
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // Recalculate on resize (debounced)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function() {
+        // Reset sticky state to get accurate measurements
+        if (isSticky) {
+          isSticky = false;
+          cartControls.classList.remove('is-sticky');
+          cartControls.style.minHeight = '';
+        }
+        updateMeasurements();
+        handleScroll();
+      }, 150);
+    }, { passive: true });
+
+    // Initial check in case page is already scrolled
+    handleScroll();
+  })();
 </script>
 
 {% schema %}
