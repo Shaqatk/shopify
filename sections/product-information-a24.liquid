@@ -14,11 +14,7 @@
 </script>
 
 {% liquid
-  # Capture the two main blocks
-  capture media_gallery
-    content_for 'block', type: '_product-media-gallery', id: 'media-gallery', closest.product: closest.product
-  endcapture
-
+  # Capture product details block
   capture product_details
     content_for 'block', type: '_product-details', id: 'product-details', closest.product: closest.product
   endcapture
@@ -64,10 +60,27 @@
     {%- comment -%} RIGHT COLUMN: Media Stack (top) + Purchase Bar (bottom) {%- endcomment -%}
     <div class="product-information-a24__right">
       
-      {%- comment -%} Media Stack (scrolls) {%- endcomment -%}
+      {%- comment -%} Media Stack (scrolls) - Simple vertical images, no carousel {%- endcomment -%}
       {% if product_has_media %}
         <div class="product-information-a24__media">
-          {{ media_gallery }}
+          {% for media in closest.product.media %}
+            <div class="a24-media-item">
+              {% if media.media_type == 'image' %}
+                <img
+                  src="{{ media | image_url: width: 1200 }}"
+                  alt="{{ media.alt | escape }}"
+                  width="{{ media.width }}"
+                  height="{{ media.height }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  class="a24-media-item__image"
+                >
+              {% elsif media.media_type == 'video' %}
+                {{ media | video_tag: autoplay: true, loop: true, muted: true, controls: false }}
+              {% elsif media.media_type == 'external_video' %}
+                {{ media | external_video_tag }}
+              {% endif %}
+            </div>
+          {% endfor %}
         </div>
       {% endif %}
 
@@ -207,95 +220,48 @@
     /* Will be styled in Phase 3 */
   }
 
-  /* Media Stack (scrolls) - NO CAROUSEL, NO LIGHTBOX */
+  /* ============================================
+     A24 Media Stack - Simple Vertical Scroll
+     No carousel, no lightbox, no interactions
+     ============================================ */
+  
   .product-information-a24__media {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
   }
 
-  /* Force vertical stacking - override ALL Ritual carousel/grid styles */
-  .product-information-a24__media .media-gallery,
-  .product-information-a24__media .media-gallery--stacked,
-  .product-information-a24__media .media-gallery--grid,
-  .product-information-a24__media .media-gallery--slideshow {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    grid-template-columns: none !important;
+  /* Individual media item container */
+  .a24-media-item {
+    width: 100%;
+    position: relative;
   }
 
-  /* Remove ALL carousel controls */
-  .product-information-a24__media .media-gallery__controls,
-  .product-information-a24__media .slideshow-controls,
-  .product-information-a24__media .slideshow-arrows,
-  .product-information-a24__media .media-gallery__thumbnails,
-  .product-information-a24__media .media-gallery__pagination {
-    display: none !important;
+  /* Images - simple, non-interactive */
+  .a24-media-item__image {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    pointer-events: none;
+    cursor: default;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
-  /* Each media item stacks vertically */
-  .product-information-a24__media .media-gallery__item,
-  .product-information-a24__media .slideshow-slide {
-    width: 100% !important;
-    aspect-ratio: auto !important;
-    position: static !important;
-    transform: none !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    flex-shrink: 0 !important;
+  /* Videos */
+  .a24-media-item video {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
   }
 
-  /* DISABLE IMAGE CLICKING - No lightbox, no zoom, no modal */
-  .product-information-a24__media a,
-  .product-information-a24__media button,
-  .product-information-a24__media [data-media-zoom],
-  .product-information-a24__media [data-lightbox],
-  .product-information-a24__media .media-gallery__item a,
-  .product-information-a24__media .product-media a {
-    pointer-events: none !important;
-    cursor: default !important;
-  }
-
-  /* Remove any zoom/lightbox icons */
-  .product-information-a24__media .media-gallery__zoom,
-  .product-information-a24__media .zoom-icon,
-  .product-information-a24__media [class*="zoom"],
-  .product-information-a24__media [class*="lightbox"],
-  .product-information-a24__media .media-gallery__icon {
-    display: none !important;
-  }
-
-  /* Ensure images fill width and maintain aspect ratio */
-  .product-information-a24__media img,
-  .product-information-a24__media video {
-    width: 100% !important;
-    height: auto !important;
-    display: block !important;
-    object-fit: contain !important;
-    pointer-events: none !important;
-    cursor: default !important;
-  }
-
-  /* Remove any slideshow/carousel JavaScript behavior */
-  .product-information-a24__media .media-gallery__item[hidden],
-  .product-information-a24__media .slideshow-slide[hidden] {
-    display: block !important;
-  }
-
-  /* Remove hover effects that suggest clickability */
-  .product-information-a24__media .media-gallery__item:hover,
-  .product-information-a24__media .product-media:hover {
-    transform: none !important;
-    box-shadow: none !important;
-  }
-
-  /* Disable any image wrapper interactions */
-  .product-information-a24__media .product-media,
-  .product-information-a24__media .media-gallery__media,
-  .product-information-a24__media .media-wrapper {
-    pointer-events: none !important;
-    cursor: default !important;
+  /* No hover effects */
+  .a24-media-item:hover {
+    transform: none;
+    box-shadow: none;
   }
 
   /* MOBILE: Single column, purchase bar at bottom */
@@ -402,57 +368,8 @@
 {% endstylesheet %}
 
 <script>
-  // A24 Section - Disable image clicks and carousel behavior
-  document.addEventListener('DOMContentLoaded', function() {
-    const mediaContainer = document.querySelector('.product-information-a24__media');
-    if (!mediaContainer) return;
-
-    // Prevent all click events on media
-    mediaContainer.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }, true);
-
-    // Remove any existing event listeners by cloning (nuclear option)
-    const images = mediaContainer.querySelectorAll('img, video, a, button');
-    images.forEach(el => {
-      el.style.pointerEvents = 'none';
-      el.style.cursor = 'default';
-      el.removeAttribute('href');
-      el.removeAttribute('onclick');
-      el.removeAttribute('data-media-zoom');
-      el.removeAttribute('data-lightbox');
-    });
-
-    // Disable any slideshow/carousel components
-    const slideshows = mediaContainer.querySelectorAll('slideshow-component, media-gallery, [data-slideshow], [data-gallery]');
-    slideshows.forEach(slideshow => {
-      // Force all slides to be visible
-      const slides = slideshow.querySelectorAll('[hidden], .hidden');
-      slides.forEach(slide => {
-        slide.hidden = false;
-        slide.classList.remove('hidden');
-        slide.style.display = 'block';
-        slide.style.visibility = 'visible';
-        slide.style.opacity = '1';
-      });
-    });
-
-    // MutationObserver to catch any dynamically added elements
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === 1) {
-            node.style.pointerEvents = 'none';
-            if (node.tagName === 'A') node.removeAttribute('href');
-          }
-        });
-      });
-    });
-
-    observer.observe(mediaContainer, { childList: true, subtree: true });
-  });
+  // A24 Section - Simple vertical media stack (no interactions needed)
+  // Images are already non-interactive via CSS pointer-events: none
 </script>
 
 {% schema %}
