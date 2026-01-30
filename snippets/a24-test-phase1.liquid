@@ -34,7 +34,7 @@
     <!-- Typography Scale Test -->
     <div class="a24-eyebrow">Typography Scale</div>
     
-    <h1 class="a24-test-typography__hero">Hero Title (84px)</h1>
+    <h1 class="a24-test-typography__hero">Hero Title (5.25rem)</h1>
     
     <div class="a24-test-typography__price">$22.00</div>
     
@@ -60,18 +60,18 @@
     </div>
     
     <!-- Quantity Selector Test -->
-    <div class="a24-eyebrow">Quantity Selector</div>
+    <div class="a24-eyebrow">Quantity Selector (1.6875rem / 27px, weight 700)</div>
     
-    <div class="a24-quantity-selector" style="margin-bottom: 40px;">
-      <button class="a24-quantity-option is-active">1</button>
-      <button class="a24-quantity-option">2</button>
-      <button class="a24-quantity-option">3</button>
-      <button class="a24-quantity-option">4</button>
-      <button class="a24-quantity-option">5</button>
-      <button class="a24-quantity-option">6</button>
-      <button class="a24-quantity-option">7</button>
-      <button class="a24-quantity-option">8</button>
-      <button class="a24-quantity-option">9</button>
+    <div class="a24-quantity-selector-test" style="margin-bottom: 40px;">
+      <span class="a24-qty-num is-active">1</span>
+      <span class="a24-qty-num">2</span>
+      <span class="a24-qty-num">3</span>
+      <span class="a24-qty-num">4</span>
+      <span class="a24-qty-num">5</span>
+      <span class="a24-qty-num">6</span>
+      <span class="a24-qty-num">7</span>
+      <span class="a24-qty-num">8</span>
+      <span class="a24-qty-num">9</span>
     </div>
     
     <!-- Spacing Scale Test -->
@@ -125,5 +125,35 @@
   .product-information-a24 {
     width: 100%;
     min-height: 100vh;
+  }
+  
+  /* Quantity selector test - horizontal inline layout */
+  .a24-quantity-selector-test {
+    width: 100%;
+  }
+  
+  .a24-qty-num {
+    display: inline;
+    font-family: 'Zalando Sans', sans-serif;
+    font-size: 1.6875rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: #a8a8a8;
+    cursor: pointer;
+    margin-right: 0.5em;
+    transition: color 0.2s ease;
+  }
+  
+  .a24-qty-num:last-child {
+    margin-right: 0;
+  }
+  
+  .a24-qty-num:hover {
+    color: #000000;
+  }
+  
+  .a24-qty-num.is-active {
+    color: #000000;
   }
 </style>

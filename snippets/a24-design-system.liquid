@@ -185,11 +185,13 @@
   /* Hero Title (H1) - Large product title in hero section */
   .product-information-a24 .a24-hero__title,
   .product-information-a24 h1.a24-title-hero {
-    font-size: var(--a24-text-hero);
-    font-weight: var(--a24-weight-bold);
-    letter-spacing: var(--a24-ls-hero);
-    line-height: var(--a24-lh-hero);
+    font-size: 5.25rem;
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 0.87;
     margin: 0;
+    margin-left: -0.025em;
+    text-transform: none;
     color: var(--a24-color-text);
   }
   
@@ -238,11 +240,12 @@
 
   /* Price - Main price display */
   .product-information-a24 .a24-price {
-    font-family: var(--a24-font-mono);
-    font-size: var(--a24-text-price);
-    font-weight: var(--a24-weight-regular);
-    letter-spacing: var(--a24-ls-price);
-    line-height: var(--a24-lh-snug);
+    font-family: var(--a24-font-family);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.1em;
+    line-height: 1;
+    text-transform: uppercase;
     color: var(--a24-color-text);
   }
   
@@ -265,10 +268,10 @@
   .product-information-a24__left p,
   .product-information-a24__left .rte,
   .product-information-a24 .a24-body {
-    font-size: var(--a24-text-body);
-    font-weight: var(--a24-weight-regular);
-    letter-spacing: var(--a24-ls-body);
-    line-height: var(--a24-lh-body);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.19;
     color: var(--a24-color-text);
     margin-bottom: 1.2em;
   }
@@ -453,31 +456,70 @@
     border-color: var(--a24-color-text);
   }
   
-  /* Quantity selector styling */
-  .product-information-a24 .a24-quantity-selector {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--a24-space) * 1.5);
+  /* Quantity selector styling - A24 style horizontal number list */
+  .product-information-a24 .a24-quantity-selector,
+  .a24-quantity-selector {
+    display: block;
+    width: 100%;
+    white-space: normal;
+    line-height: 1.4;
   }
   
-  .product-information-a24 .a24-quantity-option {
-    font-size: var(--a24-text-h4);
-    font-weight: var(--a24-weight-regular);
-    letter-spacing: var(--a24-ls-cta);
-    color: var(--a24-color-text-light);
+  .product-information-a24 .a24-quantity-option,
+  .a24-quantity-option,
+  .product-information-a24 .a24-qty-num,
+  .a24-qty-num {
+    display: inline;
+    font-family: var(--a24-font-family), 'Zalando Sans', sans-serif;
+    font-size: 1.6875rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: var(--a24-color-text-light, #a8a8a8);
     cursor: pointer;
-    padding: var(--a24-space) calc(var(--a24-space) * 0.5);
+    margin-right: 0.5em;
     transition: color 0.2s ease;
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
   
-  .product-information-a24 .a24-quantity-option:hover {
-    color: var(--a24-color-text-grey);
+  .product-information-a24 .a24-quantity-option:last-child,
+  .a24-quantity-option:last-child,
+  .product-information-a24 .a24-qty-num:last-child,
+  .a24-qty-num:last-child {
+    margin-right: 0;
   }
   
-  .product-information-a24 .a24-quantity-option.is-active {
-    color: var(--a24-color-text);
+  .product-information-a24 .a24-quantity-option:hover,
+  .a24-quantity-option:hover,
+  .product-information-a24 .a24-qty-num:hover,
+  .a24-qty-num:hover {
+    color: var(--a24-color-text, #000000);
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .product-information-a24 .a24-quantity-option:focus,
+  .product-information-a24 .a24-quantity-option:focus-visible,
+  .a24-quantity-option:focus,
+  .a24-quantity-option:focus-visible,
+  .product-information-a24 .a24-qty-num:focus,
+  .a24-qty-num:focus {
+    outline: none !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  
+  .product-information-a24 .a24-quantity-option.is-active,
+  .a24-quantity-option.is-active,
+  .product-information-a24 .a24-qty-num.is-active,
+  .a24-qty-num.is-active {
+    color: var(--a24-color-text, #000000);
   }
 
   /* --------------------------------------------
@@ -697,17 +739,22 @@
   }
   
   .a24-test-typography__hero {
-    font-size: var(--a24-text-hero);
-    font-weight: var(--a24-weight-bold);
-    letter-spacing: var(--a24-ls-hero);
-    line-height: var(--a24-lh-hero);
+    font-size: 5.25rem;
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 0.87;
+    margin-left: -0.025em;
     margin-bottom: var(--a24-space-4);
+    text-transform: none;
   }
   
   .a24-test-typography__price {
-    font-family: var(--a24-font-mono);
-    font-size: var(--a24-text-price);
-    letter-spacing: var(--a24-ls-price);
+    font-family: var(--a24-font-family);
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: -0.1em;
+    line-height: 1;
+    text-transform: uppercase;
     margin-bottom: var(--a24-space-2);
   }
   
@@ -722,9 +769,10 @@
   }
   
   .a24-test-typography__body {
-    font-size: var(--a24-text-body);
-    letter-spacing: var(--a24-ls-body);
-    line-height: var(--a24-lh-body);
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.19;
     margin-bottom: var(--a24-space-3);
   }
   
