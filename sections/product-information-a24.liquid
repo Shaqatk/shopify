@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    {%- comment -%} RIGHT COLUMN: First Image → Cart Controls → Remaining Images {%- endcomment -%}
+    {%- comment -%} RIGHT COLUMN: First Image → Sticky Cart Bar → Remaining Images {%- endcomment -%}
     <div class="product-information-a24__right">
       
       {% if product_has_media %}
@@ -80,12 +80,28 @@
           {% endif %}
         </div>
 
-        {%- comment -%} CART CONTROLS (Quantity + Button) - After first image {%- endcomment -%}
-        <div class="a24-cart-controls" data-a24-cart-controls>
-          <div class="a24-cart-controls__inner" data-a24-cart-inner>
-            {% render 'a24-purchase-bar' %}
+        {%- comment -%} PRODUCT BAR - Sticky like A24 (position: sticky) {%- endcomment -%}
+        <div class="a24-product-bar" data-a24-product-bar>
+          <div class="a24-product-bar__grid">
+            {%- comment -%} Quantity Column {%- endcomment -%}
+            <div class="a24-product-bar__col a24-product-bar__col--quantity">
+              {% render 'a24-purchase-bar', show_button: false %}
+            </div>
+            
+            {%- comment -%} CTA/Button Column {%- endcomment -%}
+            <div class="a24-product-bar__col a24-product-bar__col--cta">
+              <button
+                type="submit"
+                form="A24-ProductForm-{{ section.id }}"
+                name="add"
+                class="a24-product-bar__cta"
+                {% unless current_variant.available %}disabled{% endunless %}
+                data-add-to-cart-button
+              >
+                <span class="a24-product-bar__cta-text">IN CART</span>
+              </button>
+            </div>
           </div>
-          <div class="a24-cart-controls__placeholder" aria-hidden="true"></div>
         </div>
 
         {%- comment -%} REMAINING IMAGES {%- endcomment -%}
@@ -294,67 +310,103 @@
   }
 
   /* ============================================
-     A24 Cart Controls - Between First Image & Rest
-     Sticky behavior with state transitions
+     A24 Product Bar - Sticky like A24.com
+     Uses position: sticky so button stays in place
      ============================================ */
   
-  .a24-cart-controls {
-    position: relative;
+  .a24-product-bar {
+    position: sticky;
+    top: -1px; /* A24 uses -1px */
+    z-index: 100;
+    background: #f1f1f1;
+    padding: 24px 0;
+    margin-bottom: 24px;
     width: 100%;
-    margin: 32px 0 24px 0;
+  }
+
+  /* Grid layout: Quantity on left, Button on right */
+  .a24-product-bar__grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  /* Quantity column */
+  .a24-product-bar__col--quantity {
+    transition: opacity 0.3s ease;
+  }
+
+  /* CTA/Button column - right aligned */
+  .a24-product-bar__col--cta {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+  }
+
+  /* The Add to Cart button (A24 style) */
+  .a24-product-bar__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 72px;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #000000;
+    background-color: transparent;
+    border: 1px solid #000000;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 200px;
+  }
+
+  .a24-product-bar__cta:hover:not(:disabled) {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  .a24-product-bar__cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #a8a8a8;
+    color: #a8a8a8;
+  }
+
+  /* ============================================
+     PINNED STATE - When bar is stuck at top
+     ============================================ */
+  
+  .a24-product-bar.state-pinned {
+    background: transparent;
+  }
+
+  /* Hide quantity when pinned (opacity, not display) */
+  .a24-product-bar.state-pinned .a24-product-bar__col--quantity {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Button turns BLACK when pinned */
+  .a24-product-bar.state-pinned .a24-product-bar__cta {
+    background-color: #000000;
+    color: #ffffff;
+    border-color: #000000;
+  }
+
+  .a24-product-bar.state-pinned .a24-product-bar__cta:hover:not(:disabled) {
+    background-color: #333333;
+    border-color: #333333;
   }
 
   /* Gap before remaining images */
   .product-information-a24__media {
-    margin-top: 8px;
-  }
-
-  .a24-cart-controls__inner {
-    position: relative;
-    transition: all 0.3s ease;
-  }
-
-  /* When sticky - fixed at top */
-  .a24-cart-controls.is-sticky .a24-cart-controls__inner {
-    position: fixed;
-    top: 24px;
-    right: 40px;
-    left: auto;
-    width: auto;
-    z-index: 999;
-  }
-
-  /* Hide quantity when sticky */
-  .a24-cart-controls.is-sticky .a24-quantity-selector {
-    display: none !important;
-  }
-
-  /* Transform button to black when sticky */
-  .a24-cart-controls.is-sticky .a24-add-to-cart {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border-color: #000000 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-  }
-
-  .a24-cart-controls.is-sticky .a24-add-to-cart:hover:not(:disabled) {
-    background-color: #333333 !important;
-    border-color: #333333 !important;
-  }
-
-  /* Hide the purchase bar content layout wrapper when sticky */
-  .a24-cart-controls.is-sticky .a24-purchase-bar__content {
-    gap: 0 !important;
-  }
-
-  /* Placeholder to maintain layout when sticky */
-  .a24-cart-controls__placeholder {
-    display: none;
-    height: 100px; /* Approximate height of cart controls */
-  }
-
-  .a24-cart-controls.is-sticky .a24-cart-controls__placeholder {
-    display: block;
+    margin-top: 0;
   }
 
   /* MOBILE: Single column, purchase bar at bottom */
@@ -366,7 +418,7 @@
     .product-information-a24__container {
       grid-template-columns: 1fr;
       gap: 24px;
-      padding: 24px var(--padding-md, 16px) 140px;
+      padding: 24px var(--padding-md, 16px) 160px;
       min-height: auto;
       align-items: flex-start;
     }
@@ -378,7 +430,7 @@
     }
 
     .product-information-a24__spacer {
-      display: none; /* No spacer on mobile */
+      display: none;
     }
 
     .product-information-a24__left-content {
@@ -394,8 +446,8 @@
       max-width: 100%;
     }
 
-    /* Cart controls - fixed at bottom on mobile */
-    .a24-cart-controls {
+    /* Product bar - fixed at bottom on mobile */
+    .a24-product-bar {
       position: fixed;
       bottom: 0;
       left: 0;
@@ -409,25 +461,34 @@
       margin: 0;
     }
 
-    /* On mobile, never use sticky top behavior */
-    .a24-cart-controls.is-sticky .a24-cart-controls__inner {
-      position: relative;
-      top: auto;
-      right: auto;
+    .a24-product-bar__grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .a24-product-bar__col--cta {
+      justify-content: stretch;
+    }
+
+    .a24-product-bar__cta {
       width: 100%;
+      padding: 20px 24px;
     }
 
-    /* Show quantity on mobile even when "sticky" */
-    .a24-cart-controls.is-sticky .a24-quantity-selector {
-      display: flex !important;
+    /* On mobile, never use pinned behavior */
+    .a24-product-bar.state-pinned {
+      background: #f1f1f1;
     }
 
-    /* Keep button outlined on mobile */
-    .a24-cart-controls.is-sticky .a24-add-to-cart {
-      background-color: transparent !important;
-      color: #000000 !important;
-      border-color: #000000 !important;
-      box-shadow: none !important;
+    .a24-product-bar.state-pinned .a24-product-bar__col--quantity {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .a24-product-bar.state-pinned .a24-product-bar__cta {
+      background-color: transparent;
+      color: #000000;
+      border-color: #000000;
     }
 
     .product-information-a24__media {
@@ -447,14 +508,13 @@
       padding: 32px 24px;
     }
 
-    /* Tablet sticky position */
-    .a24-cart-controls.is-sticky .a24-cart-controls__inner {
-      right: 24px;
-      top: 20px;
+    .a24-product-bar__cta {
+      padding: 24px 48px;
+      min-width: 180px;
     }
   }
 
-  /* Hide the separate sticky button from purchase bar - we handle it here */
+  /* Hide the separate sticky button from purchase bar - we use position:sticky now */
   .a24-sticky-button {
     display: none !important;
   }
@@ -494,82 +554,49 @@
 {% endstylesheet %}
 
 <script>
-  // A24 Section - Sticky Cart Controls Behavior
+  // A24 Product Bar - Detect when sticky bar becomes pinned
   (function() {
-    const cartControls = document.querySelector('[data-a24-cart-controls]');
-    if (!cartControls) return;
+    const productBar = document.querySelector('[data-a24-product-bar]');
+    if (!productBar) return;
 
-    const cartInner = cartControls.querySelector('[data-a24-cart-inner]');
-    if (!cartInner) return;
-
-    // Get the initial position of cart controls
-    let initialTop = 0;
-    let controlsHeight = 0;
-    let isSticky = false;
-
-    function updateMeasurements() {
-      // Only measure when not sticky
-      if (!isSticky) {
-        const rect = cartControls.getBoundingClientRect();
-        initialTop = rect.top + window.scrollY;
-        controlsHeight = cartControls.offsetHeight;
+    // Use IntersectionObserver to detect when bar is pinned
+    // When the bar's top edge goes past the viewport top, it's pinned
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          // When not intersecting and the bar is above viewport = pinned
+          if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
+            productBar.classList.add('state-pinned');
+          } else {
+            productBar.classList.remove('state-pinned');
+          }
+        });
+      },
+      {
+        threshold: [1], // Trigger when fully visible/hidden
+        rootMargin: '1px 0px 0px 0px' // Match the -1px top
       }
-    }
+    );
 
-    function handleScroll() {
-      const scrollY = window.scrollY;
-      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height') || '0', 10);
-      const triggerPoint = initialTop - headerHeight - 24; // 24px offset from top
+    observer.observe(productBar);
 
-      if (scrollY > triggerPoint) {
-        if (!isSticky) {
-          isSticky = true;
-          cartControls.classList.add('is-sticky');
-          // Set placeholder height to prevent layout jump
-          cartControls.style.minHeight = controlsHeight + 'px';
-        }
-      } else {
-        if (isSticky) {
-          isSticky = false;
-          cartControls.classList.remove('is-sticky');
-          cartControls.style.minHeight = '';
-        }
-      }
-    }
-
-    // Initial measurements
-    updateMeasurements();
-
-    // Throttled scroll handler
+    // Also use scroll for more precise control (backup)
     let ticking = false;
     window.addEventListener('scroll', function() {
       if (!ticking) {
         window.requestAnimationFrame(function() {
-          handleScroll();
+          const rect = productBar.getBoundingClientRect();
+          // If the bar's top is at or above 0 (stuck), add pinned class
+          if (rect.top <= 0) {
+            productBar.classList.add('state-pinned');
+          } else {
+            productBar.classList.remove('state-pinned');
+          }
           ticking = false;
         });
         ticking = true;
       }
     }, { passive: true });
-
-    // Recalculate on resize (debounced)
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(function() {
-        // Reset sticky state to get accurate measurements
-        if (isSticky) {
-          isSticky = false;
-          cartControls.classList.remove('is-sticky');
-          cartControls.style.minHeight = '';
-        }
-        updateMeasurements();
-        handleScroll();
-      }, 150);
-    }, { passive: true });
-
-    // Initial check in case page is already scrolled
-    handleScroll();
   })();
 </script>
 

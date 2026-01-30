@@ -2,16 +2,20 @@
   A24 Purchase Bar
   
   Sticky purchase bar for A24 PDP with:
-  - Subscription selector (one-time vs subscribe & save)
-  - Cadence dropdown (bi-weekly/monthly selling plans)
   - Quantity selector (1-9 buttons, A24 style)
-  - Add to cart button
-  - Subscriber pricing display
+  - Add to cart button (optional via show_button param)
+  
+  @param {boolean} show_button - Whether to show the Add to Cart button (default: true)
 {% endcomment %}
 
 {% liquid
   assign product = closest.product
   assign variant = product.selected_or_first_available_variant
+  
+  # Default show_button to true if not specified
+  unless show_button == false
+    assign show_button = true
+  endunless
   
   # Check if product has selling plans (subscriptions)
   assign has_selling_plans = false
@@ -117,34 +121,27 @@
           >
         </div>
         
-        {%- comment -%} ADD TO CART BUTTON - Separate wrapper for sticky behavior {%- endcomment -%}
-        <div class="a24-button-wrapper" data-a24-button-wrapper>
-          <button
-            type="submit"
-            name="add"
-            class="a24-add-to-cart"
-            {% unless can_add_to_cart %}disabled{% endunless %}
-            data-add-to-cart-button
-          >
-            <span class="a24-add-to-cart__text">IN CART</span>
-          </button>
-        </div>
+        {%- comment -%} ADD TO CART BUTTON - Only show if show_button is true {%- endcomment -%}
+        {% if show_button %}
+          <div class="a24-button-wrapper" data-a24-button-wrapper>
+            <button
+              type="submit"
+              name="add"
+              class="a24-add-to-cart"
+              {% unless can_add_to_cart %}disabled{% endunless %}
+              data-add-to-cart-button
+            >
+              <span class="a24-add-to-cart__text">IN CART</span>
+            </button>
+          </div>
+        {% endif %}
         
       </div>
     {%- endform -%}
   </product-form-component>
 </div>
 
-{%- comment -%} Clone of button for sticky header (hidden by default) {%- endcomment -%}
-<div class="a24-sticky-button" data-a24-sticky-button aria-hidden="true">
-  <button
-    type="button"
-    class="a24-add-to-cart a24-add-to-cart--sticky"
-    data-sticky-add-to-cart
-  >
-    <span class="a24-add-to-cart__text">IN CART</span>
-  </button>
-</div>
+{%- comment -%} Clone of button for sticky header - hidden, we use position:sticky in section now {%- endcomment -%}
 
 {% stylesheet %}
   /* ============================================
