@@ -24,7 +24,7 @@
             "slideshow_controls_style": "none",
             "slideshow_mobile_controls_style": "none",
             "thumbnail_position": "none",
-            "thumbnail_width": 0,
+            "thumbnail_width": 44,
             "aspect_ratio": "natural",
             "constrain_to_viewport": false,
             "media_fit": "contain",

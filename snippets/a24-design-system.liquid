@@ -3,7 +3,7 @@
   
   Complete A24 visual design language including:
   - 4-column grid system with CSS variables
-  - Typography: NB International (fallback to Inter, Helvetica Neue)
+  - Typography: Zalando Sans (Google Fonts) with fallbacks
   - Spacing: Based on --space unit (0.625rem / 10px)
   - Color palette: Light grey background, black text
   - Minimal aesthetic with tight letter-spacing
@@ -84,9 +84,9 @@
        A24 TYPOGRAPHY
        ========================================== */
     
-    /* Font families */
-    --a24-font-family: 'NB International Web', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --a24-font-mono: 'NB International Mono Web', 'SF Mono', 'Consolas', 'Courier New', monospace;
+    /* Font families - Zalando Sans (Google Fonts) */
+    --a24-font-family: 'Zalando Sans', 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --a24-font-mono: 'SF Mono', 'Consolas', 'Courier New', monospace;
     
     /* Type scale */
     --a24-text-hero: 5.25rem;      /* 84px - Hero H1 */
@@ -171,10 +171,12 @@
      3. A24 TYPOGRAPHY STYLES
      -------------------------------------------- */
   
-  /* Base font application */
+  /* Base font application - Zalando Sans variable font */
   .product-information-a24,
   .product-information-a24 * {
     font-family: var(--a24-font-family);
+    font-optical-sizing: auto;
+    font-variation-settings: "wdth" 100;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
