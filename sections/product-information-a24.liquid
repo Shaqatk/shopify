@@ -128,7 +128,7 @@
       {%- comment -%} MEDIA GALLERY - Stacked images (Phase 5 will enhance) {%- endcomment -%}
       {% if product_has_media %}
         <div class="a24-media-gallery">
-          {% for media in product.media %}
+          {% for media in product.media offset: 1 %}
             <div class="a24-media-item" data-media-id="{{ media.id }}">
               {% if media.media_type == 'image' %}
                 <img
