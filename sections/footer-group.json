@@ -84,9 +84,9 @@
             "width": "fill",
             "custom_width": 32,
             "inherit_color_scheme": true,
+            "color_scheme": "scheme-1",
             "heading": "Get on the list",
             "heading_preset": "h5",
-            "color_scheme": "scheme-1",
             "border_style": "underline",
             "border_width": 2,
             "border_radius": 0,
@@ -127,16 +127,16 @@
         "font": "heading",
         "unit": "percent",
         "pixel_height": 48,
-        "percent_width": 100,
-        "custom_mobile_size": false,
+        "percent_width": 10,
+        "custom_mobile_size": true,
         "unit_mobile": "percent",
-        "percent_width_mobile": 100,
+        "percent_width_mobile": 50,
         "pixel_height_mobile": 120,
         "section_width": "page-width",
         "alignment_horizontal": "center",
         "color_scheme": "scheme-2",
-        "padding-block-start": 32,
-        "padding-block-end": 32
+        "padding-block-start": 0,
+        "padding-block-end": 0
       }
     },
     "utilities": {
