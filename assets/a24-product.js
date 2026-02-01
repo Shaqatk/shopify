@@ -132,8 +132,24 @@
         if (response.ok) {
           if (addToCartText) addToCartText.textContent = 'In Cart';
           addToCartButton.classList.add('is-added');
-          document.dispatchEvent(new CustomEvent('cart:updated'));
-          // Keep "In Cart" state; do not reset
+
+          var quantityAdded = 1;
+          if (quantityInput) {
+            quantityAdded = parseInt(quantityInput.value, 10) || 1;
+          }
+          document.dispatchEvent(new CustomEvent('cart:update', {
+            bubbles: true,
+            detail: {
+              resource: null,
+              sourceId: 'a24-product-bar',
+              data: { itemCount: quantityAdded, source: 'a24-product-bar' }
+            }
+          }));
+
+          var drawer = document.querySelector('cart-drawer-component');
+          if (drawer && typeof drawer.open === 'function') {
+            drawer.open();
+          }
         } else {
           var json = await response.json().catch(function () { return {}; });
           if (addToCartText) addToCartText.textContent = json.description || 'Error';

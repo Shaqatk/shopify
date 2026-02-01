@@ -75,17 +75,6 @@
             </div>
           {% endif %}
           
-          {% if has_selling_plans and savings_percent > 0 %}
-            <div class="a24-hero__member-pricing">
-              <span class="a24-hero__member-price a24-text-grey">
-                {{ member_price | money }}
-              </span>
-              <span class="a24-hero__member-text a24-text-small a24-text-grey">
-                Members save {{ savings_percent }}% 
-                <a href="/pages/membership" class="a24-hero__member-link">Join us →</a>
-              </span>
-            </div>
-          {% endif %}
         </div>
         
         {%- comment -%} Mobile Description (hidden on desktop) {%- endcomment -%}

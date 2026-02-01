@@ -3,8 +3,6 @@
   
   Shows pricing in the left column:
   - Regular price (large, bold)
-  - Member/subscription price (grey)
-  - Savings text with "Join us" link
 {% endcomment %}
 
 {% liquid
@@ -38,20 +36,12 @@
   {%- comment -%} Price Row - All prices on same line like A24 {%- endcomment -%}
   <div class="a24-pricing-display__row">
     <span class="a24-pricing-display__regular">{{ variant.price | money }}</span>
-    {% if has_selling_plans and monthly_plan %}
-      <span class="a24-pricing-display__member-price">{{ subscription_price | money }}</span>
-      <span class="a24-pricing-display__savings">
-        Members save {{ savings_percent }}% 
-        <a href="/pages/aaa24" class="a24-pricing-display__join-link">Join us →</a>
-      </span>
-    {% endif %}
   </div>
 </div>
 
 {% stylesheet %}
   /* ============================================
      A24 Pricing Display (Left Column)
-     Matches A24: $22  $19.80  Members save 10% Join us →
      ============================================ */
   
   .a24-pricing-display {
