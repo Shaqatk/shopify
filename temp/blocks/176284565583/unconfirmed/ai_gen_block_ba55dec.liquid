@@ -1,6 +1,283 @@
+{% doc %}
+  @prompt
+    add a header that has simple text only, delvieriing to the following areas with a link to a deliveryies page. 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-delivery-header-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-delivery-header__container-{{ ai_gen_id }} {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: {{ block.settings.text_alignment }};
+    gap: {{ block.settings.spacing }}px;
+  }
+
+  .ai-delivery-header__text-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    margin: 0;
+  }
+
+  .ai-delivery-header__areas-{{ ai_gen_id }} {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ block.settings.spacing }}px;
+    align-items: center;
+  }
+
+  .ai-delivery-header__link-{{ ai_gen_id }} {
+    color: {{ block.settings.link_color }};
+    text-decoration: {{ block.settings.link_underline }};
+    font-size: {{ block.settings.text_size }}px;
+    transition: color 0.2s ease;
+  }
+
+  .ai-delivery-header__link-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-delivery-header__separator-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    opacity: 0.5;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-delivery-header__container-{{ ai_gen_id }} {
+      flex-direction: column;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .ai-delivery-header__text-{{ ai_gen_id }},
+    .ai-delivery-header__link-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-delivery-header-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-delivery-header__container-{{ ai_gen_id }}">
+    {% if block.settings.header_text != blank %}
+      <p class="ai-delivery-header__text-{{ ai_gen_id }}">{{ block.settings.header_text }}</p>
+    {% endif %}
+
+    <div class="ai-delivery-header__areas-{{ ai_gen_id }}">
+      {% if block.settings.area_1 != blank %}
+        <a href="{{ block.settings.deliveries_page }}" class="ai-delivery-header__link-{{ ai_gen_id }}">
+          {{ block.settings.area_1 }}
+        </a>
+      {% endif %}
+
+      {% if block.settings.area_2 != blank %}
+        {% if block.settings.area_1 != blank %}
+          <span class="ai-delivery-header__separator-{{ ai_gen_id }}">|</span>
+        {% endif %}
+        <a href="{{ block.settings.deliveries_page }}" class="ai-delivery-header__link-{{ ai_gen_id }}">
+          {{ block.settings.area_2 }}
+        </a>
+      {% endif %}
+
+      {% if block.settings.area_3 != blank %}
+        {% if block.settings.area_1 != blank or block.settings.area_2 != blank %}
+          <span class="ai-delivery-header__separator-{{ ai_gen_id }}">|</span>
+        {% endif %}
+        <a href="{{ block.settings.deliveries_page }}" class="ai-delivery-header__link-{{ ai_gen_id }}">
+          {{ block.settings.area_3 }}
+        </a>
+      {% endif %}
+
+      {% if block.settings.area_4 != blank %}
+        {% if block.settings.area_1 != blank or block.settings.area_2 != blank or block.settings.area_3 != blank %}
+          <span class="ai-delivery-header__separator-{{ ai_gen_id }}">|</span>
+        {% endif %}
+        <a href="{{ block.settings.deliveries_page }}" class="ai-delivery-header__link-{{ ai_gen_id }}">
+          {{ block.settings.area_4 }}
+        </a>
+      {% endif %}
+
+      {% if block.settings.area_5 != blank %}
+        {% if block.settings.area_1 != blank or block.settings.area_2 != blank or block.settings.area_3 != blank or block.settings.area_4 != blank %}
+          <span class="ai-delivery-header__separator-{{ ai_gen_id }}">|</span>
+        {% endif %}
+        <a href="{{ block.settings.deliveries_page }}" class="ai-delivery-header__link-{{ ai_gen_id }}">
+          {{ block.settings.area_5 }}
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
 {% schema %}
- {
-   "name": "AI_Block",
-   "tag": "shopify-ai-generated-block"
- }
+{
+  "name": "Delivery areas header",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "header_text",
+      "label": "Header text",
+      "default": "Delivering to:"
+    },
+    {
+      "type": "url",
+      "id": "deliveries_page",
+      "label": "Deliveries page link"
+    },
+    {
+      "type": "text",
+      "id": "area_1",
+      "label": "Area 1",
+      "default": "Toronto"
+    },
+    {
+      "type": "text",
+      "id": "area_2",
+      "label": "Area 2",
+      "default": "Mississauga"
+    },
+    {
+      "type": "text",
+      "id": "area_3",
+      "label": "Area 3",
+      "default": "Brampton"
+    },
+    {
+      "type": "text",
+      "id": "area_4",
+      "label": "Area 4"
+    },
+    {
+      "type": "text",
+      "id": "area_5",
+      "label": "Area 5"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "spacing",
+      "label": "Spacing between items",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#c9584c"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Link color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Link hover color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "link_underline",
+      "label": "Link underline",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        }
+      ],
+      "default": "underline"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Delivery areas header"
+    }
+  ]
+}
 {% endschema %}
