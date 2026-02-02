@@ -410,7 +410,7 @@
         "text_RGxHtE": {
           "type": "text",
           "settings": {
-            "text": "<h1><a href=\"/collections/all\" title=\"All products\">SHOP NOW </a></h1>",
+            "text": "<h1><a href=\"/products/coffee\" title=\"Cold Brew 12 pack\">SHOP NOW </a></h1>",
             "width": "100%",
             "max_width": "normal",
             "alignment": "left",
