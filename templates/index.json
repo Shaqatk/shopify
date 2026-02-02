@@ -11,32 +11,10 @@
   "sections": {
     "1769991677f0534830": {
       "type": "_blocks",
-      "blocks": {
-        "ai_gen_block_b42ab95_aNEAjq": {
-          "type": "ai_gen_block_b42ab95",
-          "settings": {
-            "announcement_text": "🚚 Now Delivering Across the<strong> Greater Toronto Area (GTA) only</strong>",
-            "link_text": "",
-            "link_url": "shopify://pages/faq",
-            "background_color": "#d2d2d2",
-            "text_color": "#000000",
-            "link_color": "#a13a30",
-            "link_hover_color": "#000000",
-            "link_underline": "underline",
-            "font_size": 16,
-            "font_size_mobile": 14,
-            "padding_vertical": 12
-          },
-          "blocks": {}
-        }
-      },
-      "block_order": [
-        "ai_gen_block_b42ab95_aNEAjq"
-      ],
       "settings": {
-        "content_direction": "column",
-        "vertical_on_mobile": true,
-        "horizontal_alignment": "flex-start",
+        "content_direction": "row",
+        "vertical_on_mobile": false,
+        "horizontal_alignment": "center",
         "vertical_alignment": "center",
         "align_baseline": false,
         "horizontal_alignment_flex_direction_column": "flex-start",
@@ -59,6 +37,47 @@
         "gradient_direction": "to top",
         "padding-block-start": 0,
         "padding-block-end": 0
+      }
+    },
+    "marquee_CJ8Hkg": {
+      "type": "marquee",
+      "blocks": {
+        "text_MM8hg9": {
+          "type": "text",
+          "settings": {
+            "text": "<p>🚚 Now Delivering Across the<strong> Greater Toronto Area (GTA) only</strong></p>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-subheading--family)",
+            "font_size": "1rem",
+            "line_height": "tight",
+            "letter_spacing": "tight",
+            "case": "none",
+            "wrap": "nowrap",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_MM8hg9"
+      ],
+      "name": "t:names.marquee_section",
+      "settings": {
+        "movement_direction": "normal",
+        "color_scheme": "",
+        "padding-block-start": 24,
+        "padding-block-end": 24,
+        "gap_between_elements": 24
       }
     },
     "product_list_8kR3Hb": {
@@ -376,6 +395,7 @@
   },
   "order": [
     "1769991677f0534830",
+    "marquee_CJ8Hkg",
     "product_list_8kR3Hb",
     "marquee_9AMajF"
   ]
