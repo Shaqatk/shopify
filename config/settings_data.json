@@ -87,7 +87,7 @@
       },
       "1193221860352293121": {
         "type": "shopify://apps/kwik-booster/blocks/app-embed/fc61c79e-84cc-43aa-96d7-3c14109f275c",
-        "disabled": true,
+        "disabled": false,
         "settings": {}
       }
     },
