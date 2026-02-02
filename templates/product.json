@@ -278,7 +278,7 @@
               "type": "text",
               "name": "t:names.text",
               "settings": {
-                "text": "<p><br/>Subscribe for automatic monthly delivery.</p>",
+                "text": "<p><br/>Subscribe for automatic monthly delivery.<br/><strong>Delivering Across the Greater Toronto Area (GTA) only <br/></strong></p>",
                 "width": "fit-content",
                 "max_width": "narrow",
                 "alignment": "left",
