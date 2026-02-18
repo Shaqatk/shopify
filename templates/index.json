@@ -104,6 +104,7 @@
       "block_order": [
         "ai_gen_block_b42ab95_fYmX48"
       ],
+      "disabled": true,
       "name": "Delivery announcement",
       "settings": {
         "content_direction": "column",

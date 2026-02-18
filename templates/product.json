@@ -74,6 +74,7 @@
       "block_order": [
         "ai_gen_block_b42ab95_pjmRwy"
       ],
+      "disabled": true,
       "name": "Delivery announcement",
       "settings": {
         "content_direction": "column",
